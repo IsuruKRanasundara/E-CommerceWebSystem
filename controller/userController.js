@@ -105,6 +105,7 @@ const deleteUser = async (req, res) => {
 
 
 
+// Exporting the userController object containing all the methods
 const userController = {
     createUser,
     getAllUsers,
