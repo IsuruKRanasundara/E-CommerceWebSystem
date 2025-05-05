@@ -11,13 +11,9 @@ const orderItemSchema = new Schema(
             ref: 'Order',
             required: true,
         },
-        productId: {
+        cartId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-            required: true,
-        },
-        quantity: {
-            type: Number,
+            ref: 'Cart',
             required: true,
         },
         price: {

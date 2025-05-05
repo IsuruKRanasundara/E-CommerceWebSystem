@@ -25,12 +25,28 @@ const orderSchema = new Schema(
             enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
             default: 'Pending',
         },
-        createdAt: {
-            type: Date,
-            default: Date.now,
+        totalPrice: {
+            type: Number,
+            required: true,
         },
+
+
+
+
+        orderItem: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'OrderItem',
+            required: true,
+            
+        }
+        
     });
   
+
+
+
+
+
 
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;
