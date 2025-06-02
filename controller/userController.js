@@ -57,19 +57,6 @@ const getUsersById = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 };
-const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await userModel.find({ email: email, password: password });
-        if (!user) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-        res.status(200).json({ message: "Login successful" });
-    } catch (e) {
-        console.error("Error logging in user:", e);
-        res.status(500).json({ message: "Server Error" });
-    }
-};
 const updateUser = async (req, res) => {
     try {
         const id = req.user._id;
@@ -104,6 +91,7 @@ const deleteUser = async (req, res) => {
 
 
 
+//Auths functions and the login functions in User Routes Package
 
 // Exporting the userController object containing all the methods
 // to be used in the routes
