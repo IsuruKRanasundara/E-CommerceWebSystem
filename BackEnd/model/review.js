@@ -5,6 +5,8 @@ const reviewSchema = new mongoose.Schema({
     rating: { type: Number, required: true },
     comment: String,
     createdAt: { type: Date, default: Date.now }
+    //Todo:complete
+
 });
 
 module.exports = mongoose.model('Review', reviewSchema);
