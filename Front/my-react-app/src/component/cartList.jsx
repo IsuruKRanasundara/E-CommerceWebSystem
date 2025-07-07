@@ -48,38 +48,8 @@ export default function CartSidebar() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Main content area */}
-      <div className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Experience</h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Sample product cards */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="w-full h-48 bg-gray-200 rounded-lg mb-4"></div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sample Product 1</h3>
-              <p className="text-gray-600 mb-4">$99.99</p>
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                Add to Cart
-              </button>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="w-full h-48 bg-gray-200 rounded-lg mb-4"></div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sample Product 2</h3>
-              <p className="text-gray-600 mb-4">$149.99</p>
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                Add to Cart
-              </button>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="w-full h-48 bg-gray-200 rounded-lg mb-4"></div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sample Product 3</h3>
-              <p className="text-gray-600 mb-4">$79.99</p>
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                Add to Cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+     
+         
 
       {/* Cart Sidebar */}
       <div className={`fixed right-0 top-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -170,20 +140,7 @@ export default function CartSidebar() {
         </div>
       </div>
 
-      {/* Toggle button when sidebar is closed */}
-      {!isOpen && (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="fixed right-4 top-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
-        >
-          <ShoppingBag className="h-6 w-6" />
-          {cartItems.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {cartItems.length}
-            </span>
-          )}
-        </button>
-      )}
+   
 
       {/* Overlay when sidebar is open */}
       {isOpen && (

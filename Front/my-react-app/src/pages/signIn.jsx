@@ -15,7 +15,7 @@ export default function SignIn() {
     const [email,setEmail] = React.useState("");
     const [password,setPassword] = React.useState("");
     const [rememberMe, setRememberMe] = React.useState(false);
-    const handleSignIne = () => {
+    const handleSignIn = () => {
         if(!email||!password) {
             alert("Please fill in all fields");
 
@@ -30,7 +30,7 @@ export default function SignIn() {
         <Card className="w-96">
             <CardHeader
                 variant="gradient"
-                color="orange"
+                color="orange-700"
                 className="mb-4 grid h-28 place-items-center"
             >
                 <Typography variant="h3" color="white">
@@ -38,14 +38,18 @@ export default function SignIn() {
                 </Typography>
             </CardHeader>
             <CardBody className="flex flex-col gap-4">
-                <Input label="Email" size="lg" onChange={()=>setEmail(e.target.value)}/>
-                <Input label="Password" size="lg" onChange={()=>setPassword(e.target.value)} />
+                <Input label="Email" size="lg" onChange={(e)=>setEmail(e.target.value)}/>
+                <Input label="Password" size="lg" onChange={(e)=>setPassword(e.target.value)} />
                 <div className="-ml-2.5">
-                    <Checkbox label="Remember Me" />
+                    <Checkbox 
+                        label="Remember Me" 
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                    />
                 </div>
             </CardBody>
             <CardFooter className="pt-0">
-                <Button variant="gradient" fullWidth>
+                <Button variant="gradient" fullWidth onClick={handleSignIn}>
                     Sign In
                 </Button>
                 <Typography variant="small" className="mt-6 flex justify-center">

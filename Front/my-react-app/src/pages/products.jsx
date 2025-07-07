@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Star, ShoppingCart, ArrowLeft, Plus, Minus, Heart, Share2 } from "lucide-react";
-
+import Description from "../component/description";
+import Features from "../component/features";
+import ReviewSection from "../component/reviewSection";
+import { AddToCart, ProductCard, ProductDetail } from "../component/productCard";
+import HeroSection from "../component/heroSection";
+import CarouselDemo from "../component/latest";
 const products = [
   {
     id: 1,
@@ -301,79 +306,16 @@ export default function EcommerceApp() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!selectedProduct.inStock}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-medium transition-colors ${
-                    selectedProduct.inStock
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock'}
-                </button>
-                <button
-                  onClick={() => toggleFavorite(selectedProduct.id)}
-                  className={`p-3 rounded-md border transition-colors ${
-                    favorites.includes(selectedProduct.id)
-                      ? 'bg-red-50 border-red-300 text-red-600'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${favorites.includes(selectedProduct.id) ? 'fill-current' : ''}`} />
-                </button>
-                <button className="p-3 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
+              <AddToCart 
+                handleAddToCart={handleAddToCart} 
+                selectedProduct={selectedProduct} 
+                toggleFavorite={toggleFavorite} 
+                favorites={favorites} 
+              />
 
-              {/* Description */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                <p className="text-gray-600 leading-relaxed">{selectedProduct.description}</p>
-              </div>
-
-              {/* Features */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
-                <ul className="space-y-2">
-                  {selectedProduct.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-gray-600">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Reviews Section */}
-          <div className="mt-16">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h3>
-            <div className="space-y-6">
-              {productReviews.map((review) => (
-                <div key={review.id} className="bg-white p-6 rounded-lg shadow-sm border">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-medium">{review.name[0]}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-900">{review.name}</span>
-                        <div className="flex items-center gap-1 mt-1">
-                          {renderStars(review.rating)}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{review.date}</span>
-                  </div>
-                  <p className="text-gray-600">{review.comment}</p>
-                </div>
-              ))}
+              <Description selectedProduct={selectedProduct} />
+              <Features selectedProduct={selectedProduct} />
+              <ReviewSection productReviews={productReviews} renderStars={renderStars} />
             </div>
           </div>
         </div>
@@ -383,93 +325,16 @@ export default function EcommerceApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <h1 className="text-2xl font-bold text-gray-900">TechStore</h1>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <ShoppingCart className="w-6 h-6 text-gray-700" />
-                {cart.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold mb-4">Premium Tech Products</h2>
-            <p className="text-xl opacity-90">Discover the latest technology at unbeatable prices</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Products Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              onClick={() => handleProductClick(product)}
-              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-            >
-              <div className="relative">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(product.id);
-                  }}
-                  className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
-                    favorites.includes(product.id)
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
-                </button>
-                {!product.inStock && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">Out of Stock</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-6">
-                <span className="text-sm text-blue-600 font-medium">{product.category}</span>
-                <h3 className="text-xl font-bold text-gray-900 mt-1 mb-2">{product.name}</h3>
-                
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-1">
-                    {renderStars(product.rating)}
-                  </div>
-                  <span className="text-sm text-gray-500">({product.reviews})</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-gray-900">${product.price}</span>
-                    <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
-                  </div>
-                  <div className={`w-3 h-3 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`} />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <CarouselDemo />
+      <HeroSection />
+      <ProductCard 
+        products={products} 
+        handleProductClick={handleProductClick}
+        toggleFavorite={toggleFavorite}
+        favorites={favorites}
+        renderStars={renderStars}
+      />
     </div>
   );
 }
+     

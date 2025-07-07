@@ -3,6 +3,92 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+ 
+/* Color Scheme Variables */
 
+  /* Primary Colors */
+  --primary-orange: #ff7800;
+  --primary-orange-light: #ff8c1a;
+  --primary-orange-dark: #e65c00;
+  
+  /* Secondary Colors */
+  --secondary-gray: #6b7280;
+  --secondary-gray-light: #f3f4f6;
+  --secondary-gray-dark: #374151;
+  
+  /* Accent Colors */
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  
+  /* Neutral Colors */
+  --white: #ffffff;
+  --black: #000000;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
 }
+
+/* Utility Classes for Color Scheme */
+.bg-primary { background-color: var(--primary-orange); }
+.bg-primary-light { background-color: var(--primary-orange-light); }
+.bg-primary-dark { background-color: var(--primary-orange-dark); }
+
+.text-primary { color: var(--primary-orange); }
+.text-primary-light { color: var(--primary-orange-light); }
+.text-primary-dark { color: var(--primary-orange-dark); }
+
+.border-primary { border-color: var(--primary-orange); }
+.border-primary-light { border-color: var(--primary-orange-light); }
+.border-primary-dark { border-color: var(--primary-orange-dark); }
+
+/* Hover States */
+.hover\:bg-primary:hover { background-color: var(--primary-orange); }
+.hover\:text-primary:hover { color: var(--primary-orange); }
+.hover\:border-primary:hover { border-color: var(--primary-orange); }
+
+/* Focus States */
+.focus\:ring-primary:focus { --tw-ring-color: var(--primary-orange); }
+.focus\:border-primary:focus { border-color: var(--primary-orange); }
+
+/* Gradient Classes */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary-orange), var(--primary-orange-light));
+}
+
+.gradient-primary-to-transparent {
+  background: linear-gradient(135deg, var(--primary-orange), transparent);
+}
+
+/* Shadow with Primary Color */
+.shadow-primary {
+  box-shadow: 0 4px 6px -1px rgba(255, 120, 0, 0.1), 0 2px 4px -1px rgba(255, 120, 0, 0.06);
+}
+
+/* Status Color Classes */
+.bg-success { background-color: var(--success); }
+.bg-warning { background-color: var(--warning); }
+.bg-error { background-color: var(--error); }
+.bg-info { background-color: var(--info); }
+
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-info { color: var(--info); }
+/* End Generation Here */
+
 

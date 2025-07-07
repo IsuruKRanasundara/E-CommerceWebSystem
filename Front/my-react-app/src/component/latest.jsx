@@ -134,19 +134,17 @@ export default function CarouselDemo() {
   ];
 
   return (
-    <div className="relative overflow-hidden w-full h-full py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 my-5 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-            Immersive Gallery
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
+            Quick Deals!
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Experience stunning visuals with our interactive carousel component
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+           Explore our latest products and get the best deals on the market
           </p>
         </div>
         
         <Carousel slides={slideData} />
       </div>
-    </div>
   );
 }

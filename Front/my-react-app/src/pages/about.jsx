@@ -1,34 +1,40 @@
 import React, { useState } from 'react';
 import { ChevronRight, ShoppingCart, Award, ShieldCheck, Smile, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function About() {
+    const navigate = useNavigate();
     const [hoveredCard, setHoveredCard] = useState(null);
 
     const values = [
         {
-            icon: <ShieldCheck className="w-8 h-8" />,
+            icon: <ShieldCheck className="w-8 h-8 text-blue-600" />,
             title: "Trusted Quality",
-            description: "We ensure every product meets the highest standards of quality and reliability."
+            description: "We ensure every product meets the highest standards of quality and reliability.",
+            bgColor: "bg-blue-50"
         },
         {
-            icon: <Smile className="w-8 h-8" />,
+            icon: <Smile className="w-8 h-8 text-green-600" />,
             title: "Customer Satisfaction",
-            description: "Our customers are at the heart of everything we do, and we strive to exceed expectations."
+            description: "Our customers are at the heart of everything we do, and we strive to exceed expectations.",
+            bgColor: "bg-green-50"
         },
         {
-            icon: <Award className="w-8 h-8" />,
+            icon: <Award className="w-8 h-8 text-yellow-600" />,
             title: "Award-Winning Service",
-            description: "Recognized for excellence in customer service and product innovation."
+            description: "Recognized for excellence in customer service and product innovation.",
+            bgColor: "bg-yellow-50"
         },
         {
-            icon: <Users className="w-8 h-8" />,
+            icon: <Users className="w-8 h-8 text-purple-600" />,
             title: "Community Focused",
-            description: "We value our community and work to create meaningful connections."
+            description: "We value our community and work to create meaningful connections.",
+            bgColor: "bg-purple-50"
         }
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-orange-700 via-orange-500 to-orange-700">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 animate-pulse"></div>
@@ -41,7 +47,7 @@ export default function About() {
                             Discover the story behind our brand and why thousands of customers trust us for their shopping needs.
                         </p>
                         <div className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-400">
-                            <button className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white font-semibold rounded-full hover:from-orange-700 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                            <button onClick={() => navigate('/')} className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white font-semibold rounded-full hover:from-orange-700 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
                                 Shop Now
                                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -141,7 +147,7 @@ export default function About() {
                 <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
                     Explore our wide range of products and find what you need today.
                 </p>
-                <button className="group inline-flex items-center px-12 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white font-semibold rounded-full hover:from-orange-700 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg">
+                <button onClick={() => navigate('/')} className="group inline-flex items-center px-12 py-4 bg-gradient-to-r from-orange-600 to-yellow-600 text-white font-semibold rounded-full hover:from-orange-700 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg">
                     Start Shopping
                     <ShoppingCart className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
