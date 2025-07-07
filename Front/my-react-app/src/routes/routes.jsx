@@ -2,6 +2,7 @@ import React from "react";
 
 import About from "../pages/about.jsx";
 import {  Routes, Route } from "react-router-dom";
+import SignIn from "../pages/signIn.jsx";
 
 function MainNavRoute() {
 
@@ -13,6 +14,7 @@ function MainNavRoute() {
                 <Routes>
                     <Route path={"/"} element={<strong>welcome</strong>}/>
                     <Route path={"/about"} element={<About/>}/>
+                    <Route path={"/signIn"} element={<SignIn/>}/>
                 </Routes>
 
         </>

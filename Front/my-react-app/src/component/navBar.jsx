@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, Search, User, ShoppingCart, Bell } from 'lucide-react';
 import {useLocation, useNavigate} from "react-router-dom";
+import SignIn from "../pages/signIn.jsx";
 
 export default function ModernNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,7 +73,7 @@ export default function ModernNavbar() {
                             <ShoppingCart className="h-5 w-5" />
                         </button>
 
-                        <button className="bg-orange-800 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition-all duration-300 flex items-center space-x-2">
+                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-orange-800 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition-all duration-300 flex items-center space-x-2">
                             <User className="h-4 w-4" />
                             <span>Sign In</span>
                         </button>
@@ -134,7 +135,7 @@ export default function ModernNavbar() {
                                 <ShoppingCart className="h-5 w-5" />
                             </button>
                         </div>
-                        <button className="bg-orange-800 text-white px-4 py-2 rounded-full hover:bg-orange-700 flex items-center space-x-2">
+                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-orange-800 text-white px-4 py-2 rounded-full hover:bg-orange-700 flex items-center space-x-2">
                             <User className="h-4 w-4" />
                             <span>Sign In</span>
                         </button>
