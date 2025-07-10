@@ -1,0 +1,1 @@
+// should be create a signup page using react and tailwindcss n jsx format using orange and white colors and there should be intrtactive animations the web sitw is e commerce web .in teractive real ages can display in signup page .alignment should be modern
