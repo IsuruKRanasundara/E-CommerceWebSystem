@@ -23,13 +23,13 @@ export default function ModernNavbar() {
     }
 
     return (
-        <nav className="bg-white shadow-lg border-b-2 border-orange-700">
+        <nav className="bg-white shadow-lg border-b-2 border-primary">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex items-center">
                         <div className="flex-shrink-0">
-                            <div className="bg-orange-700 text-white px-4 py-2 rounded-lg font-bold text-xl">
+                            <div className="bg-primary text-white px-4 py-2 rounded-lg font-bold text-xl">
                                 LOGO
                             </div>
                         </div>
@@ -49,8 +49,8 @@ export default function ModernNavbar() {
                                     }}
                                     className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
                                         activeItem === item.name && currentPath === item.path
-                                            ? 'bg-orange-700 text-white shadow-lg'
-                                            : 'text-gray-700 hover:bg-orange-100 hover:text-orange-700'
+                                            ? 'bg-primary text-white shadow-lg'
+                                            : 'text-gray-700 hover:bg-orange-100 hover:text-primary'
                                     }`}
                                 >
                                     {item.name}
@@ -65,18 +65,18 @@ export default function ModernNavbar() {
                             <input
                                 type="text"
                                 placeholder="Search..."
-                                className="bg-gray-100 text-gray-700 placeholder-gray-500 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-orange-700 focus:bg-white transition-all duration-300"
+                                className="bg-gray-100 text-gray-700 placeholder-gray-500 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-300"
                             />
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         </div>
 
-                        <button className="p-2 text-gray-700 hover:text-orange-700 hover:bg-orange-100 rounded-full transition-all duration-300">
+                        <button className="p-2 text-gray-700 hover:text-primary hover:bg-orange-100 rounded-full transition-all duration-300">
                             <Bell className="h-5 w-5" />
                         </button>
 
                         <button
                             onClick={() => openCart(true)}
-                            className="p-2 text-gray-700 hover:text-orange-700 hover:bg-orange-100 rounded-full transition-all duration-300">
+                            className="p-2 text-gray-700 hover:text-primary hover:bg-orange-100 rounded-full transition-all duration-300">
                             <ShoppingCart className="h-5 w-5" />
                         </button>
                         {
@@ -85,9 +85,13 @@ export default function ModernNavbar() {
                                ):null
                         }
 
-                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-orange-700 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition-all duration-300 flex items-center space-x-2">
+                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-primary text-white px-4 py-2 rounded-full hover:bg-white hover:text-primary transition-all duration-300 flex items-center space-x-2 border-2 border-primary">
                             <User className="h-4 w-4" />
                             <span>Sign In</span>
+                        </button>
+                        <button onClick={()=>navigate('/signUp')&& currentPath==='/signUp'} className=" text-primary px-4 py-2 rounded-full hover:bg-primary hover:text-white transition-all duration-300 flex items-center space-x-2 border-2 border-primary">
+                            <User className="h-4 w-4" />
+                            <span>Sign Up</span>
                         </button>
                     </div>
 
@@ -95,7 +99,7 @@ export default function ModernNavbar() {
                     <div className="md:hidden">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="text-gray-700 hover:text-orange-700 hover:bg-orange-100 p-2 rounded-md transition-all duration-300"
+                            className="text-gray-700 hover:text-primary hover:bg-orange-100 p-2 rounded-md transition-all duration-300"
                         >
                             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
@@ -116,8 +120,8 @@ export default function ModernNavbar() {
                                 }}
                                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ${
                                     activeItem === item.name && currentPath === item.path
-                                        ? 'bg-orange-700 text-white'
-                                        : 'text-gray-700 hover:bg-orange-100 hover:text-orange-700'
+                                        ? 'bg-primary text-white'
+                                        : 'text-gray-700 hover:bg-orange-100 hover:text-primary'
                                 }`}
                             >
                                 {item.name}
@@ -131,7 +135,7 @@ export default function ModernNavbar() {
                             <input
                                 type="text"
                                 placeholder="Search..."
-                                className="w-full bg-gray-100 text-gray-700 placeholder-gray-500 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-orange-700 focus:bg-white"
+                                className="w-full bg-gray-100 text-gray-700 placeholder-gray-500 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
                             />
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         </div>
@@ -140,16 +144,20 @@ export default function ModernNavbar() {
                     {/* Mobile Actions */}
                     <div className="px-4 py-3 border-t border-gray-200 flex justify-between items-center">
                         <div className="flex space-x-4">
-                            <button className="p-2 text-gray-700 hover:text-orange-700 hover:bg-orange-100 rounded-full">
+                            <button className="p-2 text-gray-700 hover:text-primary hover:bg-orange-100 rounded-full">
                                 <Bell className="h-5 w-5" />
                             </button>
-                            <button className="p-2 text-gray-700 hover:text-orange-700 hover:bg-orange-100 rounded-full">
+                            <button className="p-2 text-gray-700 hover:text-primary hover:bg-orange-100 rounded-full">
                                 <ShoppingCart className="h-5 w-5" />
                             </button>
                         </div>
-                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-orange-700 text-white px-4 py-2 rounded-full hover:bg-orange-700 flex items-center space-x-2">
+                        <button onClick={()=>navigate('/signIn')&& currentPath==='/signIn'} className="bg-primary text-white px-4 py-2 rounded-full hover:bg-white hover:text-primary transition-all duration-300 flex items-center space-x-2 border-2 border-primary">
                             <User className="h-4 w-4" />
                             <span>Sign In</span>
+                        </button>
+                        <button onClick={()=>navigate('/signUp')&& currentPath==='/signUp'} className=" text-primary px-4 py-2 rounded-full hover:bg-primary hover:text-white transition-all duration-300 flex items-center space-x-2 border-2 border-primary">
+                            <User className="h-4 w-4" />
+                            <span>Sign Up</span>
                         </button>
                     </div>
                 </div>

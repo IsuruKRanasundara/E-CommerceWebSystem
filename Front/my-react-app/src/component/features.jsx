@@ -5,7 +5,7 @@ const Features = ({selectedProduct}) => {
         <ul className="space-y-2">
           {selectedProduct.features.map((feature, index) => (
             <li key={index} className="flex items-center gap-2 text-gray-600">
-              <div className="w-2 h-2 bg-blue-600 rounded-full" />
+              <div className="w-2 h-2 bg-primary rounded-full" />
               {feature}
             </li>
           ))}

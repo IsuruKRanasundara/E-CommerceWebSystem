@@ -34,7 +34,7 @@ export default function ProductDetail ({
             {/* Product Info */}
             <div className="space-y-6">
               <div>
-                <span className="text-sm text-blue-600 font-medium">{selectedProduct.category}</span>
+                <span className="text-sm text-primary font-medium">{selectedProduct.category}</span>
                 <h1 className="text-3xl font-bold text-gray-900 mt-1">{selectedProduct.name}</h1>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex items-center gap-1">

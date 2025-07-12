@@ -42,7 +42,20 @@
   --error: #ef4444;
   --info: #3b82f6;
 }
-
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(-20px) scale(1); }
+  50% { transform: translateY(20px) scale(1.05);}
+}
+.animate-slidein {
+  animation: slidein 1s cubic-bezier(.68,-0.55,.27,1.55);
+}
+@keyframes slidein {
+  0% { opacity: 0; transform: translateY(80px) scale(0.96);}
+  100% { opacity: 1; transform: translateY(0) scale(1);}
+}
 /* Utility Classes for Color Scheme */
 .bg-primary { background-color: var(--primary-orange); }
 .bg-primary-light { background-color: var(--primary-orange-light); }

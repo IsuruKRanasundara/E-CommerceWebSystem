@@ -11,7 +11,7 @@ export const AddToCart = ({handleAddToCart,selectedProduct,toggleFavorite,favori
           disabled={!selectedProduct.inStock}
           className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-medium transition-colors ${
             selectedProduct.inStock
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              ? 'bg-primary text-white hover:bg-blue-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
@@ -67,7 +67,7 @@ export const ProductCard = ({ products, handleProductClick, toggleFavorite, favo
                         </div>
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-blue-600 font-medium">{product.category}</span>
+                                <span className="text-sm text-primary font-medium">{product.category}</span>
                                 <div className="flex items-center gap-1">
                                     {renderStars(product.rating)}
                                     <span className="text-sm text-gray-500">({product.reviews})</span>
@@ -131,7 +131,7 @@ export const ProductDetail = ({
                     {/* Product Info */}
                     <div className="space-y-6">
                         <div>
-                            <span className="text-sm text-blue-600 font-medium">{selectedProduct.category}</span>
+                            <span className="text-sm text-primary font-medium">{selectedProduct.category}</span>
                             <h1 className="text-3xl font-bold text-gray-900 mt-1">{selectedProduct.name}</h1>
                             <div className="flex items-center gap-2 mt-2">
                                 <div className="flex items-center gap-1">
