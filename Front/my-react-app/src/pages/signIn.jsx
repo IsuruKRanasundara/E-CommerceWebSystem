@@ -181,7 +181,7 @@ export default function SignIn() {
     } catch (error) {
       setMessage({ 
         type: "error", 
-        text: `Failed to sign in with ${provider}. Please try again.` 
+        text: `Failed to sign in with ${error}. Please try again.` 
       });
     } finally {
       setSocialLoading(prev => ({ ...prev, [provider]: false }));
