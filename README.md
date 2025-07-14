@@ -786,3 +786,36 @@ EMAIL_PASS=your-password
 ---
 
 This comprehensive documentation provides a complete overview of the MERN stack e-commerce website, covering all essential aspects from architecture to deployment. The modular structure ensures scalability and maintainability while providing a robust foundation for online retail operations.
+In FrontEnd 
+SignIn page components =>
+-SignIn.jsx
+-including tailwind css
+-form with interactive components
+-validations
+-option in signin in google and facebook
+-redirect to home page after successful login
+- error handling for invalid credentials
+- responsive design for mobile and desktop views
+- integration with backend API for authentication
+- user feedback messages for success and error states
+- accessibility features for better user experience
+-color theme light orange -600
+and white
+- use of icons for visual cues
+
+
+SignUp page components =>
+-SignUp.jsx
+-including tailwind css
+-form with interactive components
+-validations
+-option in signup in google and facebook
+-redirect to home page after successful signup
+- error handling for invalid credentials
+- responsive design for mobile and desktop views
+- integration with backend API for authentication
+- user feedback messages for success and error states
+- accessibility features for better user experience
+-color theme light orange -600
+and white
+- use of icons for visual cues
