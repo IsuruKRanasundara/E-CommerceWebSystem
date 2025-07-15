@@ -819,3 +819,13 @@ SignUp page components =>
 -color theme light orange -600
 and white
 - use of icons for visual cues
+
+cartList component=>
+-Should behave like a toggle window 
+-using white and orange theme
+-it should have a feature to change the quantity for each item
+-and each item of a list should have a remove button
+-total should be display in black color in bottom of the cart component
+- should have a button to checkout
+-after clicking checkout button it should display a pop up alert 'Are you confirm checkout?'
+- if user ok to the confirmation alert it should navigate to the checkout page

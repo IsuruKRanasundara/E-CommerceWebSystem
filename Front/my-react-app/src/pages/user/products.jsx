@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Star, ShoppingCart, ArrowLeft, Plus, Minus, Heart, Share2 } from "lucide-react";
-import Description from "../component/description";
-import Features from "../component/features";
-import ReviewSection from "../component/reviewSection";
-import { AddToCart, ProductCard, ProductDetail } from "../component/productCard";
-import HeroSection from "../component/heroSection";
-import CarouselDemo from "../component/latest";
+import Description from "../../component/description";
+import Features from "../../component/features";
+import ReviewSection from "../../component/reviewSection";
+import { AddToCart, ProductCard, ProductDetail } from "../../component/productCard";
+import HeroSection from "../../component/heroSection";
+import CarouselDemo from "../../component/latest";
 const products = [
   {
     id: 1,

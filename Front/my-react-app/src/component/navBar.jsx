@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, Search, User, ShoppingCart, Bell } from 'lucide-react';
 import {useLocation, useNavigate} from "react-router-dom";
-import SignIn from "../pages/signIn.jsx";
-import CartSidebar from "./cartList.jsx";
+import SignIn from "../pages/user/signIn.jsx";
 
 export default function ModernNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
