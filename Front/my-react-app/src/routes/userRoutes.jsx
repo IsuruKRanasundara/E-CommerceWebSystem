@@ -2,12 +2,12 @@ import React from "react";
 
 import About from "../pages/user/about.jsx";
 import {  Routes, Route } from "react-router-dom";
-import SignIn from "../features/user/signIn.jsx";
-import Ecommerce from "../features/product/products.jsx";
+import SignIn from "../pages/user/signIn.jsx";
+import Ecommerce from "../pages/user/products.jsx";
 import ContactUs from "../pages/user/contactUs.jsx";
-import SignUp from "../features/user/signup.jsx";
-import NotFound from "../pages/notFound.jsx";
-import CartList from "../features/cart/cartList.jsx";
+import SignUp from "../pages/user/signup.jsx";
+import NotFound from "../pages/user/not-found.jsx";
+import CartList from "../pages/user/cartList.jsx";
 
 function MainNavRoute() {
 

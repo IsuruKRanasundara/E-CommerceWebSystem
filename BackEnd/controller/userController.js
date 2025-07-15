@@ -43,11 +43,11 @@ const createUser = async (req, res) => {
             email,
             password: hashedPassword,
             phone,
-            verificationCode: uuidv4(),
+           
         });
         await newUser.save();
-        sendEmail(email, newUser.verificationCode);
-        sendSMS(phone, newUser.verificationCode);
+        //sendEmail(email, newUser.verificationCode);
+        //sendSMS(phone, newUser.verificationCode);
         res.status(201).json(userRes(newUser,"User Create Successfully"));
     } catch (error) {
         console.error("Error creating user:", error);
