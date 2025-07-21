@@ -1,5 +1,6 @@
 //create a checkout page
 import React, { useState } from "react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const Checkout = () => {
   const [form, setForm] = useState({
@@ -8,6 +9,29 @@ const Checkout = () => {
     address: "",
     payment: "card",
   });
+const usingPaypal =()=>(  
+
+    <PayPalScriptProvider options={{ "client-id": "YOUR_PAYPAL_CLIENT_ID" }}>
+      <PayPalButtons
+        style={{ layout: "vertical" }}
+        createOrder={(data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: "20.00", // Replace with your checkout amount
+              },
+            }],
+          });
+        }}
+        onApprove={(data, actions) => {
+          return actions.order.capture().then(function (details) {
+            alert("Transaction completed by " + details.payer.name.given_name);
+            // Handle successful transaction here
+          });
+        }}
+      />
+    </PayPalScriptProvider>
+  );
 
   // Dummy cart data
   const cartItems = [
