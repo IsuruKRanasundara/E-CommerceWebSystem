@@ -1,24 +1,19 @@
 import React from "react";
 import './App.css'
 
-import ModernNavbar from "./component/navBar.jsx";
 import MainNavRoute from "./routes/userRoutes.jsx";
+import AdminNavRoute from "./routes/adminRoutes.jsx"; // Add this import
+
 function App() {
+    const isAdmin = window.location.pathname.startsWith('/admin');
 
-  return (
-      <>
+    return (
+        <>
 
+                {isAdmin ? <AdminNavRoute /> : <MainNavRoute />}
 
+        </>
+    );
+}
 
-                    <header>
-                        <ModernNavbar/>
-                    </header>
-                   <section>
-                       <MainNavRoute/>
-                   </section>
-
-            </>
-          )
-          }
-
-          export default App
+export default App;

@@ -1,8 +1,8 @@
 import { ShoppingCart, Heart, Share2 } from "lucide-react";
 import { Star, ArrowLeft, Minus, Plus } from "lucide-react";
-import Description from './description';
-import Features from './features';
-import ReviewSection from './reviewSection';
+import Description from './description.jsx';
+import Features from './features.jsx';
+import ReviewSection from './reviewSection.jsx';
 
 export const AddToCart = ({handleAddToCart,selectedProduct,toggleFavorite,favorites}) => {
     return ( <div className="flex gap-4">
@@ -11,7 +11,7 @@ export const AddToCart = ({handleAddToCart,selectedProduct,toggleFavorite,favori
           disabled={!selectedProduct.inStock}
           className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-medium transition-colors ${
             selectedProduct.inStock
-              ? 'bg-primary text-white hover:bg-blue-700'
+              ? 'bg-primary text-white hover:bg-white hover:text-primary border border-primary'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
@@ -162,19 +162,19 @@ export const ProductDetail = ({
                         {selectedProduct.inStock && (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm font-medium text-gray-700">Quantity:</span>
-                                <div className="flex items-center border border-gray-300 rounded-md">
+                                <div className="flex items-center border border-gray-600 rounded-md">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="p-2 hover:bg-gray-100 transition-colors"
+                                        className="p-2 hover:bg-gray-300 text-gray-600 transition-colors"
                                     >
-                                        <Minus className="w-4 h-4" />
+                                        <Minus className="w-4 h-4 bg-gray-600" />
                                     </button>
-                                    <span className="px-4 py-2 border-x border-gray-300 min-w-[60px] text-center">{quantity}</span>
+                                    <span className="px-4 py-2 text-gray-600 border-x border-gray-600 min-w-[60px] text-center">{quantity}</span>
                                     <button
                                         onClick={() => setQuantity(Math.min(selectedProduct.stockCount, quantity + 1))}
-                                        className="p-2 hover:bg-gray-100 transition-colors"
+                                        className="p-2 hover:bg-gray-300 text-gray-600 transition-colors"
                                     >
-                                        <Plus className="w-4 h-4" />
+                                        <Plus className="w-4 h-4 bg-gray-600" />
                                     </button>
                                 </div>
                             </div>

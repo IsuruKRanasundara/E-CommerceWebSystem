@@ -3,8 +3,7 @@ const userModel= require("../model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
-const { sendEmail } = require("../utils/emailService");
-const { sendSMS } = require("../utils/smsService");
+
 const userRes=(user,messageText)=>({
     message: messageText,
     token:genToken(user),

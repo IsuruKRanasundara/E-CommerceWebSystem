@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Menu, X, Search, User, ShoppingCart, Bell } from 'lucide-react';
 import {useLocation, useNavigate} from "react-router-dom";
-import SignIn from "../pages/user/signIn.jsx";
+import SignIn from "../../pages/user/signIn.jsx";
+import CartItem from "@/component/cart/cartItem.jsx";
+import CartCheckoutFlow from "@/component/cart/cart.jsx";
 
 export default function ModernNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,7 +82,7 @@ export default function ModernNavbar() {
                         </button>
                         {
                                (isCartOpen)?(
-                                <CartSidebar/>
+                                <CartCheckoutFlow/>
                                ):null
                         }
 
