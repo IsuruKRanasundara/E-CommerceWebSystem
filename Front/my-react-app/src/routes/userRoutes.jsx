@@ -6,15 +6,14 @@ import Ecommerce from "../pages/user/products.jsx";
 import ContactUs from "../pages/user/contactUs.jsx";
 import SignUp from "../pages/user/signup.jsx";
 import NotFound from "../pages/user/not-found.jsx";
-import CartList from "../pages/user/cartList.jsx";
-import ModernNavbar from "@/component/common/navBar.jsx";
 import Footer from "@/component/common/footer.jsx";
+import ModernNavigationBar from "@/component/common/navBar.jsx";
 
 function MainNavRoute() {
     return (
         <>
             <header>
-                <ModernNavbar />
+                <ModernNavigationBar />
             </header>
             <section>
                 <Routes>

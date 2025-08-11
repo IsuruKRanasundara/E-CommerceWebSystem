@@ -1,131 +1,183 @@
-//create a checkout page
 import React, { useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useNavigate } from "react-router-dom";
 
-const Checkout = () => {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    address: "",
-    payment: "card",
-  });
-const usingPaypal =()=>(  
+const Checkout = ({ cartItems = [] }) => {
+    const navigate = useNavigate();
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        address: "",
+        payment: "card",
+    });
 
-    <PayPalScriptProvider options={{ "client-id": "YOUR_PAYPAL_CLIENT_ID" }}>
-      <PayPalButtons
-        style={{ layout: "vertical" }}
-        createOrder={(data, actions) => {
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: "20.00", // Replace with your checkout amount
-              },
-            }],
-          });
-        }}
-        onApprove={(data, actions) => {
-          return actions.order.capture().then(function (details) {
-            alert("Transaction completed by " + details.payer.name.given_name);
-            // Handle successful transaction here
-          });
-        }}
-      />
-    </PayPalScriptProvider>
-  );
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Dummy cart data
-  const cartItems = [
-    { name: "Product 1", price: 25 },
-    { name: "Product 2", price: 40 },
-  ];
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            // Handle order submission logic here
+            if (form.payment === "paypal") {
+                return; // PayPal handles its own submission
+            }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+            // Process other payment methods
+            alert("Order placed successfully!");
+            navigate("/order-confirmation");
+        } catch (error) {
+            alert("Error processing order");
+        }
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle checkout logic here
-    alert("Order placed!");
-  };
+    const renderPayPalButtons = () => (
+        <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID }}>
+            <PayPalButtons
+                style={{ layout: "vertical" }}
+                createOrder={(data, actions) => {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2),
+                            },
+                        }],
+                    });
+                }}
+                onApprove={async (data, actions) => {
+                    const details = await actions.order.capture();
+                    alert("Transaction completed by " + details.payer.name.given_name);
+                    navigate("/order-confirmation");
+                }}
+            />
+        </PayPalScriptProvider>
+    );
 
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center py-8">
-      <div className="w-full max-w-lg bg-orange-50 shadow-lg rounded-lg p-8">
-        <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">
-          Checkout
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            name="name"
-            type="text"
-            required
-            placeholder="Full Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-          <input
-            name="address"
-            type="text"
-            required
-            placeholder="Address"
-            value={form.address}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-
-          <div>
-            <label className="block font-semibold text-orange-700 mb-2">Payment Method</label>
-            <select
-              name="payment"
-              value={form.payment}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="card">Credit Card</option>
-              <option value="paypal">PayPal</option>
-              <option value="cod">Cash on Delivery</option>
-            </select>
-          </div>
-
-          <div className="bg-white p-4 mt-4 rounded shadow-sm">
-            <h3 className="text-xl font-semibold text-orange-600 mb-2">Order Summary</h3>
-            <ul className="mb-2">
-              {cartItems.map((item, idx) => (
-                <li key={idx} className="flex justify-between py-1">
-                  <span>{item.name}</span>
-                  <span className="text-orange-700 font-bold">${item.price}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-between border-t pt-2 font-bold text-orange-800">
-              <span>Total:</span>
-              <span>${total}</span>
+    if (!cartItems.length) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-orange-600 mb-4">Your cart is empty</h2>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded"
+                    >
+                        Continue Shopping
+                    </button>
+                </div>
             </div>
-          </div>
+        );
+    }
 
-          <button
-            type="submit"
-            className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded transition duration-200"
-          >
-            Place Order
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-8">
+            <div className="max-w-4xl mx-auto px-4">
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Order Summary */}
+                    <div className="md:w-1/2">
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h2 className="text-2xl font-bold text-orange-600 mb-4">Order Summary</h2>
+                            <div className="space-y-4">
+                                {cartItems.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-4 border-b pb-4">
+                                        <img
+                                            src={item.imageUrl}
+                                            alt={item.name}
+                                            className="w-16 h-16 object-cover rounded"
+                                        />
+                                        <div className="flex-1">
+                                            <h3 className="font-medium">{item.name}</h3>
+                                            <p className="text-gray-600">
+                                                ${item.price} × {item.quantity}
+                                            </p>
+                                        </div>
+                                        <span className="font-bold text-orange-600">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
+                                    </div>
+                                ))}
+                                <div className="flex justify-between pt-4 font-bold text-lg">
+                                    <span>Total:</span>
+                                    <span className="text-orange-600">${total.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Checkout Form */}
+                    <div className="md:w-1/2">
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h2 className="text-2xl font-bold text-orange-600 mb-4">Checkout</h2>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <input
+                                        name="name"
+                                        type="text"
+                                        required
+                                        value={form.name}
+                                        onChange={handleChange}
+                                        className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        required
+                                        value={form.email}
+                                        onChange={handleChange}
+                                        className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Address</label>
+                                    <input
+                                        name="address"
+                                        type="text"
+                                        required
+                                        value={form.address}
+                                        onChange={handleChange}
+                                        className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                                    <select
+                                        name="payment"
+                                        value={form.payment}
+                                        onChange={handleChange}
+                                        className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                    >
+                                        <option value="card">Credit Card</option>
+                                        <option value="paypal">PayPal</option>
+                                        <option value="cod">Cash on Delivery</option>
+                                    </select>
+                                </div>
+
+                                {form.payment === "paypal" ? (
+                                    renderPayPalButtons()
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-200"
+                                    >
+                                        Place Order
+                                    </button>
+                                )}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default Checkout;
