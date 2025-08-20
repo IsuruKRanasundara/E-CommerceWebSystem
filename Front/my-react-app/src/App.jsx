@@ -17,3 +17,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
+//TOdO: Integrate the routes within an APIs of backend

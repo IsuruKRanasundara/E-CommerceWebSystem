@@ -3,7 +3,19 @@ const userModel= require("../model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
-
+const genToken=(user)=>{
+    return jwt.sign(
+        {
+            id:user._id,
+            email:user.email,
+            role:user.role,
+        },
+        process.env.JWT_SECRET_KEY,
+        {
+            expiresIn: '7d'
+        }
+    );
+};
 const userRes=(user,messageText)=>({
     message: messageText,
     token:genToken(user),
@@ -16,19 +28,7 @@ const userRes=(user,messageText)=>({
 });
 
 
-const genToken=(user)=>{
-    return jwt.sign(
-        {
-            id:user._id,
-            email:user.email,
-            role:user.role,
-        },
-        Process.env.JWT_SECRET_KEY,
-        {
-            expiresIn: '7d'
-        }
-    );
-};
+
 const createUser = async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
@@ -36,7 +36,9 @@ const createUser = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
+
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(hashedPassword);
         const newUser = new userModel({
             name,
             email,
@@ -45,32 +47,46 @@ const createUser = async (req, res) => {
            
         });
         await newUser.save();
+
         //sendEmail(email, newUser.verificationCode);
         //sendSMS(phone, newUser.verificationCode);
-        res.status(201).json(userRes(newUser,"User Create Successfully"));
+
+
+        res.status(200).json(newUser=>userRes(newUser,"User Create Successfully"));
+
+
+
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Server Error,Try Again Later" });
     }
 };
-const loginUser= async (req,res)=>{
-    const {email,password}=req.body;
-    try{
-        const user= await userModel.findOne({ email: email});
-        if(!user){
-            return res.status(400).json({message: 'Invalid email!'})
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email!' });
         }
-        const isMatch= await bcrypt.compare(password,user.password);
-        if(!isMatch){
-            return res.status(400).json({message: 'Invalid password!'})
 
+        console.log("👉 Plain password from request:", password);
+        console.log("👉 Hashed password from DB:", user.password);
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log("👉 Password match:", isMatch);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid password!' });
         }
-        res.json(userRes(user,'login successful'));
-    }catch (e) {
-        return res.status(500).json({message: 'Server Error ... Try Again!'})
 
+        res.status(200).json(userRes(user, "Login successful"));
+    } catch (e) {
+        console.error("Login error:", e);
+        return res.status(500).json({ message: 'Server Error ... Try Again!' });
     }
-}
+};
+
+
 
 
 const getAllUsers = async (req, res) => {
@@ -142,6 +158,8 @@ const userController = {
     getUserById,
     updateUser,
     deleteUser,
+    loginUser,
+    genToken
 };
 module.exports = userController;
 
