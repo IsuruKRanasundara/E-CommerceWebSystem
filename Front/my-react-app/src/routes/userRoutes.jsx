@@ -8,6 +8,8 @@ import SignUp from "../pages/user/signup.jsx";
 import NotFound from "../pages/user/not-found.jsx";
 import Footer from "@/component/common/footer.jsx";
 import ModernNavigationBar from "@/component/common/navBar.jsx";
+import EcommerceServices from "@/pages/user/service.jsx";
+import Checkout from "@/pages/user/checkout.jsx";
 
 function MainNavRoute() {
     return (
@@ -23,6 +25,8 @@ function MainNavRoute() {
                     <Route path="/signIn" element={<SignIn />} />
                     <Route path="/signUp" element={<SignUp />} />
                     <Route path="/contact" element={<ContactUs />} />
+                    <Route path="/services" element={<EcommerceServices/>} />
+                    <Route path="/checkout" element={<Checkout />} />
                 </Routes>
             </section>
             <footer>

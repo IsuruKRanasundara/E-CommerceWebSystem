@@ -38,11 +38,10 @@ const createUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log(hashedPassword);
         const newUser = new userModel({
             name,
             email,
-            password: hashedPassword,
+            password:hashedPassword,
             phone,
            
         });
@@ -52,8 +51,8 @@ const createUser = async (req, res) => {
         //sendSMS(phone, newUser.verificationCode);
 
 
-        res.status(200).json(newUser=>userRes(newUser,"User Create Successfully"));
-
+        res.status(200).json("User Create Successfully");
+        console.log(userRes(newUser,'User Created Successfully'));
 
 
     } catch (error) {
@@ -69,17 +68,15 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid email!' });
         }
 
-        console.log("👉 Plain password from request:", password);
-        console.log("👉 Hashed password from DB:", user.password);
-
+        console.log(user.password);
+        console.log(password);
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log("👉 Password match:", isMatch);
-
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid password!' });
         }
 
-        res.status(200).json(userRes(user, "Login successful"));
+        res.status(200).json(user, "Login successful");
+        console.log(userRes(user,'Login Successful'));
     } catch (e) {
         console.error("Login error:", e);
         return res.status(500).json({ message: 'Server Error ... Try Again!' });

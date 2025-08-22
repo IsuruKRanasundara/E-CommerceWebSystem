@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, Search, User, ShoppingCart, Bell } from 'lucide-react';
 import { useLocation, useNavigate } from "react-router-dom";
 import NotificationPanel from '../../pages/user/notificationPanel';
+import { existingItem } from "@/pages/user/products.jsx";
 
 // CartSidebar Component
-const CartSidebar = ({ isOpen, onClose, cartItems, navigate }) => (
+const CartSidebar = ({ isOpen, onClose, cartItems, navigate, updateQuantity, removeItem, getTotal }) => (
     <>
         {isOpen && (
             <div
@@ -32,7 +33,7 @@ const CartSidebar = ({ isOpen, onClose, cartItems, navigate }) => (
                             <button
                                 onClick={() => {
                                     onClose();
-                                    navigate('/');
+                                    navigate('/products');
                                 }}
                                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-all duration-300"
                             >
@@ -43,14 +44,36 @@ const CartSidebar = ({ isOpen, onClose, cartItems, navigate }) => (
                         <div className="space-y-4">
                             {cartItems.map((item) => (
                                 <div key={item.id} className="flex items-center space-x-4 border-b pb-4">
-                                    <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                                    <img
+                                        src={item.imageUrl || item.image}
+                                        alt={item.name}
+                                        className="w-16 h-16 object-cover rounded"
+                                    />
                                     <div className="flex-1">
                                         <h3 className="font-medium">{item.name}</h3>
-                                        <p className="text-gray-600">${item.price}</p>
+                                        <p className="text-gray-600">${item.price.toFixed(2)}</p>
                                         <div className="flex items-center space-x-2 mt-2">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                className="bg-orange-500 hover:bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm"
+                                            >
+                                                -
+                                            </button>
                                             <span>Qty: {item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                className="bg-orange-500 hover:bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm"
+                                            >
+                                                +
+                                            </button>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={() => removeItem(item.id)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -61,7 +84,7 @@ const CartSidebar = ({ isOpen, onClose, cartItems, navigate }) => (
                         <div className="mb-4 flex justify-between items-center font-bold">
                             <span>Total:</span>
                             <span className="text-orange-600">
-                                ${cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                                ${getTotal()}
                             </span>
                         </div>
                         <button
@@ -85,9 +108,27 @@ export default function ModernNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-    const [cartItems] = useState([]); // Replace with your cart logic
+    const [cartItems, setCartItems] = useState([]);
     const location = useLocation();
     const navigate = useNavigate();
+
+    // Sync with global cart state
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (existingItem && existingItem.items) {
+                setCartItems([...existingItem.items]);
+            }
+        }, 100);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Initial load
+    useEffect(() => {
+        if (existingItem && existingItem.items) {
+            setCartItems([...existingItem.items]);
+        }
+    }, []);
 
     const menuItems = [
         { name: 'Home', path: '/' },
@@ -96,6 +137,35 @@ export default function ModernNavbar() {
         { name: 'About', path: '/about' },
         { name: 'Contact', path: '/contact' }
     ];
+
+    const syncCart = (updatedCart) => {
+        existingItem.items = updatedCart;
+        setCartItems([...updatedCart]);
+    };
+
+    const updateQuantity = (id, newQuantity) => {
+        if (newQuantity <= 0) {
+            removeItem(id);
+            return;
+        }
+        const updatedCart = cartItems.map(item =>
+            item.id === id ? {...item, quantity: newQuantity} : item
+        );
+        syncCart(updatedCart);
+    };
+
+    const removeItem = (id) => {
+        const updatedCart = cartItems.filter(item => item.id !== id);
+        syncCart(updatedCart);
+    };
+
+    const getTotal = () => {
+        return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+    };
+
+    const getTotalItems = () => {
+        return cartItems.reduce((total, item) => total + item.quantity, 0);
+    };
 
     return (
         <nav className="bg-white shadow-lg border-b-2 border-orange-500">
@@ -154,7 +224,7 @@ export default function ModernNavbar() {
                             <ShoppingCart className="h-5 w-5" />
                             {cartItems.length > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                                    {cartItems.length}
+                                    {getTotalItems()}
                                 </span>
                             )}
                         </button>
@@ -238,7 +308,7 @@ export default function ModernNavbar() {
                                 <ShoppingCart className="h-5 w-5" />
                                 {cartItems.length > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                                        {cartItems.length}
+                                        {getTotalItems()}
                                     </span>
                                 )}
                             </button>
@@ -269,6 +339,9 @@ export default function ModernNavbar() {
                 onClose={() => setIsCartOpen(false)}
                 cartItems={cartItems}
                 navigate={navigate}
+                updateQuantity={updateQuantity}
+                removeItem={removeItem}
+                getTotal={getTotal}
             />
 
             {/* Notification Panel */}
