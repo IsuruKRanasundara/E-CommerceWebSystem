@@ -1,6 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const protectedRoute=require('../middleware/authMiddleware');
+const {authMiddleware}=require('../middleware/authMiddleware');
 const adminRoutes=require('../middleware/roleMiddleware');
 const {
     createReview,
@@ -10,7 +10,7 @@ const {
 
 
 
-router.get('/:id',protectedRoute,getAllReviewById);
-router.post('/:reviewDetail',protectedRoute,createReview);
-router.put('/:reviewDetail',protectedRoute,updateReview);
+router.get('/:id',authMiddleware,getAllReviewById);
+router.post('/:reviewDetail',authMiddleware,createReview);
+router.put('/:reviewDetail',authMiddleware,updateReview);
 module.exports=router;

@@ -2,14 +2,13 @@
 
 const express=require('express');
 const router=express.Router();
-const protectedRoutes=require('../middleware/authMiddleware');
-const onlyAdmin=require('../middleware/roleMiddleware');
+const {authMiddleware}=require('../middleware/authMiddleware');
 const {
     createOrderedItems,
     getOrderedItemsById
     }= require('../controller/oderedItemController');
 
 
-router.get('/:id',protectedRoutes,getOrderedItemsById);
-router.post('/:orderDetaile',protectedRoutes,createOrderedItems);
+router.get('/:id',authMiddleware,getOrderedItemsById);
+router.post('/:orderDetaile',authMiddleware,createOrderedItems);
 module.exports=router;

@@ -1,7 +1,7 @@
 const express=require('express');
 const router = express.Router();
-const protectedRoute= require('../middleware/authMiddleware');
-const roleAuthentication =require('../middleware/roleMiddleware');
+const {authMiddleware}= require('../middleware/authMiddleware');
+const { allowOnlyAdmin} =require('../middleware/roleMiddleware');
 const {
     createProduct,
     getAllProducts,
@@ -13,11 +13,11 @@ const {
     searchProducts,
     updateProduct
 } = require("../controller/productController");
-router.post('/create/:id',roleAuthentication,protectedRoute,createProduct);
+router.post('/create/',authMiddleware,createProduct);
 router.get('/get/',getAllProducts);
-router.get('/get/:id',protectedRoute,getProductById);
-router.put('/get/:id',protectedRoute,updateQtyProduct);
-router.delete('/get/:id',roleAuthentication,protectedRoute,deleteProduct);
+router.get('/get/:id',authMiddleware,getProductById);
+router.put('/get/:id',authMiddleware,updateQtyProduct);
+router.delete('/get/:id',allowOnlyAdmin,authMiddleware,deleteProduct);
 router.get('/get/:category',getProductsByCategory);
 router.get('/get/:priceRange',getProductsByPriceRange);
 router.get('/get/:product',searchProducts);

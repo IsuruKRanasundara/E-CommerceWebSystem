@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const {
     createPayment,
 
@@ -11,8 +11,8 @@ const {
 
 //Public Routes
 
-router.post('/', protect, createPayment); // Create a new payment
+router.post('/', authMiddleware, createPayment); // Create a new payment
 router.get('/',getAllPayment);
-router.get('/:id',protect,getPayment);
+router.get('/:id',authMiddleware,getPayment);
 
 module.exports=router;

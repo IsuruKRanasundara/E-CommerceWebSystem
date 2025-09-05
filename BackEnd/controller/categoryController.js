@@ -10,12 +10,14 @@ const catRes=(category,messageText)=>({
 });
 const createCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const name  = req.body;
+        console.log(name);
         const newCategory = new categoryModel({
-            name,
+            name
         });
         await newCategory.save();
-        res.status(201).json(catRes(newCategory,'Category Created Successfully'));
+        console.log(newCategory);
+        res.status(200).json('Category Created Successfully');
     } catch (error) {
         console.error("Error creating category:", error);
         res.status(500).json({ message: "Server Error" });

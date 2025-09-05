@@ -72,3 +72,8 @@ const updateReview=async (req,res)=>{
 
     }
 }
+module.exports={
+    createReview,
+    getAllReviewById,
+    updateReview
+};

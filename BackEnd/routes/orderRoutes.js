@@ -1,9 +1,9 @@
 const express=require('express');
 
 const router = express.Router();
-const protectedRoute = require('../middleware/authMiddleware');
+const {authMiddleware} = require('../middleware/authMiddleware');
 
-const onlyAdmins=require('../middleware/roleMiddleware');
+const {allowOnlyAdmin}=require('../middleware/roleMiddleware');
 const {
     createOrder,
     getAllOrders,
@@ -12,8 +12,9 @@ const {
     deleteOrder
 } = require('../controller/orderController');
 //only for the admins
-router.get('../',protectedRoute,onlyAdmins,getAllOrders);
-router.post('/:orderDetails',protectedRoute,createOrder);
-router.get('/:id',protectedRoute,getOrderById);
-router.put('/:updateDetails',protectedRoute,updateOrder);
-router.delete('/:id',protectedRoute,deleteOrder);
+router.get('/',authMiddleware,allowOnlyAdmin,getAllOrders);
+router.post('/:orderDetails',authMiddleware,createOrder);
+router.get('/:id',authMiddleware,getOrderById);
+router.put('/:updateDetails',authMiddleware,updateOrder);
+router.delete('/:id',authMiddleware,deleteOrder);
+module.exports = router;

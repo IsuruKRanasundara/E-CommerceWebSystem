@@ -1,6 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const protectedRoute=require('../middleware/authMiddleware');
+const {authMiddleware}=require('../middleware/authMiddleware');
 const adminRoutes=require('../middleware/roleMiddleware');
 
 
@@ -11,7 +11,7 @@ const{
 
 
 
-router.post('/:wishList',protectedRoute,createWishList);
-router.get('/:id',protectedRoute,getWishList);
-router.put('/:wishList',protectedRoute,updateWishList);
+router.post('/:wishList',authMiddleware,createWishList);
+router.get('/:id',authMiddleware,getWishList);
+router.put('/:wishList',authMiddleware,updateWishList);
 module.exports=router;

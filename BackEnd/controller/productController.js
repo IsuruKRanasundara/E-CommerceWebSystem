@@ -22,6 +22,7 @@ const createProduct = async (req, res) => {
 
     try {
         const { name, description, price,brand, category, stockQuantity  ,images,rating,numReviews } = req.body;
+        console.log(req.body);
         const newProduct = new productModel({
 
             name,
@@ -35,8 +36,11 @@ const createProduct = async (req, res) => {
             numReviews,
 
         });
+
         await newProduct.save();
-        res.status(200).json(productRes(newProduct,'Product Registered Successfully'));
+
+
+        res.status(200).json({message:'Product Registered Successfully'});
     } catch (error) {
         console.error("Error creating product:", error);
         res.status(500).json({ message: "Server Error" });
@@ -44,8 +48,9 @@ const createProduct = async (req, res) => {
 };
 const getAllProducts = async (req, res) => {
     try {
-        const products = await productModel.find().populate('category');
-        res.status(200).json(productRes(products,'Products'));
+        const products = await productModel.find();
+        console.log(products)
+        res.status(200).json(products);
     } catch (error) {
         console.error("Error fetching products:", error);
         res.status(500).json({ message: "Server Error" });
@@ -117,12 +122,13 @@ const deleteProduct = async (req, res) => {
 };
 const getProductsByCategory = async (req, res) => {
     try {
-        const { categoryId } = req.params;
-        const products = await productModel.find({ category: categoryId }).populate('category');
+        const { category } = req.params;
+        console.log(category);
+        const products = await productModel.find({ category: category });
         if (!products || products.length === 0) {
             return res.status(404).json({ message: "No products found in this category" });
         }
-        res.status(200).json(productRes(products,'Products'));
+        res.status(200).json(products);
     } catch (error) {
         console.error("Error fetching products by category:", error);
         res.status(500).json({ message: "Server Error" });
@@ -174,7 +180,7 @@ const updateQtyProduct= async (req,res)=>{
 
         });
     }catch (e) {
-        console.error('Error Occured !',e);
+        console.error('Error Occurred !',e);
 
     }
 }
@@ -190,5 +196,9 @@ module.exports = {
     searchProducts,
     getProductsByPriceRange
 };
+
+//In this code getProductsByCategory is not working properly
+//Because in the route category is object id
+
 
 

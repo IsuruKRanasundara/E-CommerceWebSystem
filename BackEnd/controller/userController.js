@@ -6,11 +6,11 @@ const { v4: uuidv4 } = require("uuid");
 const genToken=(user)=>{
     return jwt.sign(
         {
-            id:user._id,
+
             email:user.email,
-            role:user.role,
+            password:user.password,
         },
-        process.env.JWT_SECRET_KEY,
+        process.env.JWT_SECRET,
         {
             expiresIn: '7d'
         }
@@ -32,6 +32,7 @@ const userRes=(user,messageText)=>({
 const createUser = async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
+
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
@@ -45,12 +46,14 @@ const createUser = async (req, res) => {
             phone,
            
         });
+        console.log(newUser);
+
         await newUser.save();
 
         //sendEmail(email, newUser.verificationCode);
         //sendSMS(phone, newUser.verificationCode);
 
-
+        console.log(newUser);
         res.status(200).json("User Create Successfully");
         console.log(userRes(newUser,'User Created Successfully'));
 
@@ -64,6 +67,7 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await userModel.findOne({ email });
+        console.log(email);
         if (!user) {
             return res.status(400).json({ message: 'Invalid email!' });
         }
@@ -74,7 +78,8 @@ const loginUser = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid password!' });
         }
-
+        const generatedToken=genToken(user);
+        console.log("Generated Token:", generatedToken);
         res.status(200).json(user, "Login successful");
         console.log(userRes(user,'Login Successful'));
     } catch (e) {
@@ -112,12 +117,18 @@ const getUserById = async (req, res) => {
 };
 const updateUser = async (req, res) => {
     try {
-        const id = req.user._id;
-        const updatedUser = await userModel.findById({ _id: id });
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        res.status(200).json(userRes(updatedUser,'Account Updated Successfully'));
+        const id = req.params.id;
+        let password=req.body.password;
+
+        console.log(id);
+        const updatedUser = await userModel.findByIdAndUpdate({ _id: id }, req.body.email || password, { new: false });
+        console.log(updatedUser);
+
+
+
+        console.log(updatedUser);
+
+        res.status(200).json('Account Updated Successfully');
 
     } catch (e) {
         console.error(e);

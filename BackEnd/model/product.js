@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const {string} = require("better-auth");
 const { Schema } = mongoose;
 const productSchema = new Schema({
     _id: {
@@ -9,7 +10,7 @@ const productSchema = new Schema({
     description: String,
     price: { type: Number, required: true },
     brand: String,
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+    categoryName: { type: String },
     countInStock: { type: Number, default: 0 },
     images: [String], // URLs or file paths
     rating: { type: Number, default: 0 },
