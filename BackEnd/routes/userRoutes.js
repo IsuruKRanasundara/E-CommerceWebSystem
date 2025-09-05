@@ -15,10 +15,20 @@ const isAuthenticated = (req, res, next) => {
 
 // Public routes
 router.post('/register', createUser);
-router.get('/login', loginUser); // Only use loginUser, handle passport in controller
+router.post('/login', loginUser); // FIXED: Changed from GET to POST
 
 // Protected route to check authentication
-
+router.get('/check-auth', authMiddleware, (req, res) => {
+    res.status(200).json({
+        message: 'Authenticated',
+        user: {
+            _id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            role: req.user.role
+        }
+    });
+});
 
 // Admin and protected routes
 router.get('/profile/', allowOnlyAdmin, authMiddleware, getAllUsers);

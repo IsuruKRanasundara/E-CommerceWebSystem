@@ -1,174 +1,182 @@
-const mongoose = require("mongoose");
-const userModel= require("../model/user");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { v4: uuidv4 } = require("uuid");
-const genToken=(user)=>{
-    return jwt.sign(
-        {
+const User = require('../model/user');
 
-            email:user.email,
-            password:user.password,
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: '7d'
-        }
-    );
-};
-const userRes=(user,messageText)=>({
-    message: messageText,
-    token:genToken(user),
-    user:{
-        _id:user._id,
-        name:user.name,
-        email:user.email,
-        role:user.role,
-    }
-});
-
-
-
-const createUser = async (req, res) => {
-    try {
-        const { name, email, password, phone } = req.body;
-
-        const existingUser = await userModel.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new userModel({
-            name,
-            email,
-            password:hashedPassword,
-            phone,
-           
-        });
-        console.log(newUser);
-
-        await newUser.save();
-
-        //sendEmail(email, newUser.verificationCode);
-        //sendSMS(phone, newUser.verificationCode);
-
-        console.log(newUser);
-        res.status(200).json("User Create Successfully");
-        console.log(userRes(newUser,'User Created Successfully'));
-
-
-    } catch (error) {
-        console.error("Error creating user:", error);
-        res.status(500).json({ message: "Server Error,Try Again Later" });
-    }
-};
-const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await userModel.findOne({ email });
-        console.log(email);
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid email!' });
-        }
-
-        console.log(user.password);
-        console.log(password);
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid password!' });
-        }
-        const generatedToken=genToken(user);
-        console.log("Generated Token:", generatedToken);
-        res.status(200).json(user, "Login successful");
-        console.log(userRes(user,'Login Successful'));
-    } catch (e) {
-        console.error("Login error:", e);
-        return res.status(500).json({ message: 'Server Error ... Try Again!' });
-    }
-};
-
-
-
-
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private/Admin
 const getAllUsers = async (req, res) => {
     try {
-        const users = await userModel.find();
-        res.status(200).json(users.map(user=>userRes(user,'successful')));
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const users = await User.find()
+            .select('-password')
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const totalUsers = await User.countDocuments();
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            totalUsers,
+            totalPages: Math.ceil(totalUsers / limit),
+            currentPage: page,
+            users
+        });
     } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({ message: "Server Error" });
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
     }
 };
 
+// @desc    Get single user
+// @route   GET /api/users/:id
+// @access  Private/Admin or Owner
 const getUserById = async (req, res) => {
     try {
-        const { id } = req.user._id;
-        const user = await userModel.findById(id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        res.status(200).json(userRes(user,'successful'));
+        const user = await User.findById(req.params.id).select('-password');
 
-    } catch (e) {
-        console.error("Error fetching user:", e);
-        res.status(500).json({ message: "Server Error" });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
     }
 };
+
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private/Admin or Owner
 const updateUser = async (req, res) => {
     try {
-        const id = req.params.id;
-        let password=req.body.password;
+        const { name, email, phone, address } = req.body;
 
-        console.log(id);
-        const updatedUser = await userModel.findByIdAndUpdate({ _id: id }, req.body.email || password, { new: false });
-        console.log(updatedUser);
+        const user = await User.findById(req.params.id);
 
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
+        // Update fields
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (phone) user.phone = phone;
+        if (address) user.address = address;
 
-        console.log(updatedUser);
+        const updatedUser = await user.save();
 
-        res.status(200).json('Account Updated Successfully');
-
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ message: "Server Error" });
-
+        res.status(200).json({
+            success: true,
+            message: 'User updated successfully',
+            user: {
+                id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                phone: updatedUser.phone,
+                address: updatedUser.address,
+                isAdmin: updatedUser.isAdmin
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
     }
 };
+
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
 const deleteUser = async (req, res) => {
     try {
-        const id = req.user._id;
-        const deletedUser = await userModel.findByIdAndDelete({ _id: id });
-        if (!deletedUser) {
-            return res.status(404).json({ message: "User not found" });
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
         }
-        res.status(200).json(userRes(deletedUser,'Account deleted SuccessfulY'));
 
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ message: "Server Error" });
+        await User.findByIdAndDelete(req.params.id);
 
+        res.status(200).json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
     }
 };
 
+// @desc    Update user role
+// @route   PUT /api/users/:id/role
+// @access  Private/Admin
+const updateUserRole = async (req, res) => {
+    try {
+        const { isAdmin } = req.body;
 
+        const user = await User.findById(req.params.id);
 
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
+        user.isAdmin = isAdmin;
+        await user.save();
 
-//Auths functions and the login functions in User Routes Package
+        res.status(200).json({
+            success: true,
+            message: 'User role updated successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                isAdmin: user.isAdmin
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
 
-// Exporting the userController object containing all the methods
-// to be used in the routes
-const userController = {
-    createUser,
+module.exports = {
     getAllUsers,
     getUserById,
     updateUser,
     deleteUser,
-    loginUser,
-    genToken
+    updateUserRole
 };
-module.exports = userController;
-
-

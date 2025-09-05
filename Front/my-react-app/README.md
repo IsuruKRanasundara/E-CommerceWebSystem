@@ -171,7 +171,7 @@ frontend/
 │   │   └── orderService.js
 │   ├── store/
 │   │   ├── store.js
-│   │   ├── authSlice.js
+│   │   ├── userSlice.js
 │   │   ├── cartSlice.js
 │   │   └── productSlice.js
 │   ├── utils/

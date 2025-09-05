@@ -10,7 +10,7 @@ function App() {
     return (
         <>
 
-                {isAdmin ? <AdminNavRoute /> : <MainNavRoute />}
+            {isAdmin ? <AdminNavRoute /> : <MainNavRoute />}
 
         </>
     );

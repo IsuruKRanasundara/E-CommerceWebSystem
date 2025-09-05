@@ -6,32 +6,32 @@ import ReviewSection from './reviewSection.jsx';
 
 export const AddToCart = ({handleAddToCart,selectedProduct,toggleFavorite,favorites}) => {
     return ( <div className="flex gap-4">
-        <button
-          onClick={handleAddToCart}
-          disabled={!selectedProduct.inStock}
-          className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-medium transition-colors ${
-            selectedProduct.inStock
-              ? 'bg-primary text-white hover:bg-white hover:text-primary border border-primary'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <ShoppingCart className="w-5 h-5" />
-          {selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock'}
-        </button>
-        <button
-          onClick={() => toggleFavorite(selectedProduct.id)}
-          className={`p-3 rounded-md border transition-colors ${
-            favorites.includes(selectedProduct.id)
-              ? 'bg-red-50 border-red-300 text-red-600'
-              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          <Heart className={`w-5 h-5 ${favorites.includes(selectedProduct.id) ? 'fill-current' : ''}`} />
-        </button>
-        <button className="p-3 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-          <Share2 className="w-5 h-5" />
-        </button>
-    </div>    
+            <button
+                onClick={handleAddToCart}
+                disabled={!selectedProduct.inStock}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-medium transition-colors ${
+                    selectedProduct.inStock
+                        ? 'bg-primary text-white hover:bg-white hover:text-primary border border-primary'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+                <ShoppingCart className="w-5 h-5" />
+                {selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </button>
+            <button
+                onClick={() => toggleFavorite(selectedProduct.id)}
+                className={`p-3 rounded-md border transition-colors ${
+                    favorites.includes(selectedProduct.id)
+                        ? 'bg-red-50 border-red-300 text-red-600'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+            >
+                <Heart className={`w-5 h-5 ${favorites.includes(selectedProduct.id) ? 'fill-current' : ''}`} />
+            </button>
+            <button className="p-3 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                <Share2 className="w-5 h-5" />
+            </button>
+        </div>
     )
 }
 
@@ -96,17 +96,17 @@ export const ProductCard = ({ products, handleProductClick, toggleFavorite, favo
 };
 
 export const ProductDetail = ({
-    selectedProduct,
-    quantity,
-    setQuantity,
-    favorites,
-    toggleFavorite,
-    handleAddToCart,
-    renderStars,
-    calculateTotal,
-    productReviews,
-    onBack
-}) => {
+                                  selectedProduct,
+                                  quantity,
+                                  setQuantity,
+                                  favorites,
+                                  toggleFavorite,
+                                  handleAddToCart,
+                                  renderStars,
+                                  calculateTotal,
+                                  productReviews,
+                                  onBack
+                              }) => {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,11 +188,11 @@ export const ProductDetail = ({
                             </div>
                         </div>
 
-                        <AddToCart 
-                            handleAddToCart={handleAddToCart} 
-                            selectedProduct={selectedProduct} 
-                            toggleFavorite={toggleFavorite} 
-                            favorites={favorites} 
+                        <AddToCart
+                            handleAddToCart={handleAddToCart}
+                            selectedProduct={selectedProduct}
+                            toggleFavorite={toggleFavorite}
+                            favorites={favorites}
                         />
 
                         <Description selectedProduct={selectedProduct} />

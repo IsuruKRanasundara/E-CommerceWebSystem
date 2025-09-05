@@ -1,14 +1,23 @@
-// middleware/roleMiddleware.js
-
-// Middleware to allow only admin role
 const allowOnlyAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({
-        message: `Access denied. Only admin role is allowed.`,
-      });
+    if (req.user && req.user.isAdmin) {
+        next();
+    } else {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Admin privileges required.'
+        });
     }
-    next();
-  };
-  
-  module.exports = { allowOnlyAdmin };
-  
+};
+
+const allowAdminOrOwner = (req, res, next) => {
+    if (req.user && (req.user.isAdmin || req.user._id.toString() === req.params.userId)) {
+        next();
+    } else {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Admin privileges or resource ownership required.'
+        });
+    }
+};
+
+module.exports = { allowOnlyAdmin, allowAdminOrOwner };

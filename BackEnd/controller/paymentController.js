@@ -1,73 +1,65 @@
-const paymentModel=require('../model/payment');
+const Payment = require('../model/payment');
+const Order = require('../model/order');
 
-const paymentRes=(payment,messageText)=>({
-    message:messageText,
-    payment:{
-        _id:payment._id,
-        userId:payment.userId,
-        orderId:payment.orderId,
-        amount:payment.amount,
-        paymentMethod:payment.paymentMethod,
-
-    }
-});
-const createPayment=async (req, res) => {
+// Create payment
+const createPayment = async (req, res) => {
     try {
-        const {orderId, amount, paymentMethod} = req.body;
-        const userId = req.user._id;
-        const paymentcreatedAt = new Date();
-        const newPayment = new paymentModel({
+        const { orderId, amount, paymentMethod } = req.body;
+        const userId = req.user.id;
+
+        // Verify order exists and belongs to user
+        const order = await Order.findOne({ _id: orderId, userId });
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const payment = new Payment({
             userId,
             orderId,
             amount,
-            paymentMethod,
-            paymentcreatedAt,
+            paymentMethod
         });
-        await newPayment.save();
-        res.status(200).json(paymentRes(newPayment, 'Payment is creating'));
-    } catch (e) {
-        console.error("Error Creating Payment", e);
-        res.status(500).json({message: 'Server Error'});
+
+        await payment.save();
+        res.status(201).json(payment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-}
+};
 
+// Get payment by ID
+const getPaymentById = async (req, res) => {
+    try {
+        const payment = await Payment.findById(req.params.id)
+            .populate('userId', 'name email')
+            .populate('orderId');
 
-
-const getPayment=(req,res)=>{
-    try{
-        const paymentId=req.params.id
-        const payment=paymentModel.findById(paymentId);
-        if(!payment){
-            return res.status(404).json({message: 'Not Founded'});
-
+        if (!payment) {
+            return res.status(404).json({ message: 'Payment not found' });
         }
-        res.status(500).json(paymentRes(payment,'Payment'));
 
-    }catch (e) {
-        console.error("Server Error!",e);
-        res.status(400).json({message: 'Server Error!'});
+        res.status(200).json(payment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-}
-const getAllPayment = (req,res) => {
-    try{
-        const payments=paymentModel.find();
-        if(!payments){
-            return res.status(404).json({message: 'An Error!'});
-        }
-        res.status(200).json(
-            payments.map(payment=> {
-              paymentRes(payment,'payment');
-            })
-        );
-    }catch (e) {
-        console.error("Server Error!",e);
-        res.status(400).json({message: 'Server Error!'});
+};
 
+// Get all payments for a user
+const getUserPayments = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const payments = await Payment.find({ userId })
+            .populate('orderId')
+            .sort({ paymentcreatedAt: -1 });
+
+        res.status(200).json(payments);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-}
-module.exports={
+};
+
+module.exports = {
     createPayment,
-    getPayment,
-    getAllPayment,
-
-}
+    getPaymentById,
+    getUserPayments
+};

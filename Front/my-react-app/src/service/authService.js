@@ -1,22 +1,89 @@
-import api from "./api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-const AuthService = {
-    login: async (email, password) => {
-        const res = await api.post("/auth/login", { email, password });
-        if (res.data.token) {
-            localStorage.setItem("token", res.data.token);
+class AuthService {
+    // Register
+    async register(userData) {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
+        return response.json();
+    }
+
+    // Login
+    async login(credentials) {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(credentials),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
         }
-        return res.data;
-    },
 
-    register: async (userData) => {
-        const res = await api.post("/auth/register", userData);
-        return res.data;
-    },
+        return data;
+    }
 
-    logout: () => {
-        localStorage.removeItem("token");
-    },
-};
+    // Logout
+    async logout() {
+        const token = localStorage.getItem('token');
 
-export default AuthService;
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            credentials: 'include',
+        });
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        return response.json();
+    }
+
+    // Get current user
+    getCurrentUser() {
+        return JSON.parse(localStorage.getItem('user'));
+    }
+
+    // Get token
+    getToken() {
+        return localStorage.getItem('token');
+    }
+
+    // Check if user is authenticated
+    isAuthenticated() {
+        const token = this.getToken();
+        const user = this.getCurrentUser();
+        return !!(token && user);
+    }
+
+    // Refresh token
+    async refreshToken() {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.token) {
+            localStorage.setItem('token', data.token);
+        }
+
+        return data;
+    }
+}
+
+export default new AuthService();

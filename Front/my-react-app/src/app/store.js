@@ -1,12 +1,25 @@
+// src/app/store.js
 import { configureStore } from '@reduxjs/toolkit';
-import cartReducer from '../features/cart/cartSlice';
-import productReducer from '../features/products/productSlice';
-import userReducer from '../features/user/userSlice';
+import { authReducer } from '../store/userSlice.js';
+import { cartReducer } from '../store/cartSlice';
 
 export const store = configureStore({
-  reducer: {
-    cart: cartReducer,
-    products: productReducer,
-    user: userReducer
-  }
+    reducer: {
+        auth: authReducer,
+        cart: cartReducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['persist/PERSIST'],
+            },
+        }),
+});
+
+// Auto-persist cart
+store.subscribe(() => {
+    try {
+        const { cart } = store.getState();
+        localStorage.setItem('cart_v1', JSON.stringify(cart));
+    } catch {}
 });

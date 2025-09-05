@@ -1,14 +1,27 @@
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
-import cartReducer from "./cartSlice";
-import productReducer from "./productSlice";
+// src/store/store.js
+import { configureStore } from '@reduxjs/toolkit';
+import { authReducer } from './userSlice.js';
+import { cartReducer } from './cartSlice';
 
-const store = configureStore({
+export const store = configureStore({
     reducer: {
         auth: authReducer,
-        cart: cartReducer,
-        products: productReducer,
+        cart: cartReducer
     },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE']
+            }
+        })
 });
 
-export default store;
+// Auto-save cart to localStorage
+store.subscribe(() => {
+    try {
+        const state = store.getState();
+        localStorage.setItem('cart_v1', JSON.stringify(state.cart));
+    } catch (error) {
+        console.error('Failed to save cart to localStorage:', error);
+    }
+});

@@ -1,30 +1,75 @@
 import api from "./api";
 
-const ProductService = {
+const OrderService = {
+    // Create new order
+    create: async (orderData) => {
+        try {
+            const response = await api.post(`/orders/${encodeURIComponent(JSON.stringify(orderData))}`, orderData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to create order" };
+        }
+    },
+
+    // Get user's orders
+    getUserOrders: async (userId) => {
+        try {
+            const response = await api.get(`/orders/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to fetch user orders" };
+        }
+    },
+
+    // Get all orders (Admin only)
     getAll: async () => {
-        const res = await api.get("/products");
-        return res.data;
+        try {
+            const response = await api.get("/orders/");
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to fetch orders" };
+        }
     },
 
+    // Get order by ID
     getById: async (id) => {
-        const res = await api.get(`/products/${id}`);
-        return res.data;
+        try {
+            const response = await api.get(`/orders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to fetch order" };
+        }
     },
 
-    create: async (data) => {
-        const res = await api.post("/products", data);
-        return res.data;
+    // Update order
+    update: async (id, updateData) => {
+        try {
+            const response = await api.put(`/orders/${encodeURIComponent(JSON.stringify(updateData))}`, updateData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to update order" };
+        }
     },
 
-    update: async (id, data) => {
-        const res = await api.put(`/products/${id}`, data);
-        return res.data;
-    },
-
+    // Delete order (Admin only)
     delete: async (id) => {
-        const res = await api.delete(`/products/${id}`);
-        return res.data;
+        try {
+            const response = await api.delete(`/orders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to delete order" };
+        }
     },
+
+    // Update order status
+    updateStatus: async (id, status) => {
+        try {
+            const response = await api.put(`/orders/${encodeURIComponent(JSON.stringify({ status }))}`, { status });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to update order status" };
+        }
+    }
 };
 
-export default ProductService;
+export default OrderService;

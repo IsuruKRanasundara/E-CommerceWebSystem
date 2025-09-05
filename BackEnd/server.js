@@ -1,58 +1,71 @@
-// server.js
-require("dotenv").config();
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const bodyParser = require("body-parser");
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
 const app = express();
-app.use(bodyParser.json());
 
-// Secret key for JWT (keep this safe, don’t hardcode in real projects)
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-const {authMiddleware}=require("./middleware/authMiddleware");
-// ----------------------
-// 1. Mock Login Rout
-const connectDB=require("./config/db");
-// -------------
-connectDB();
-// ---------
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
+// Security Middleware
+app.use(helmet());
 
-    // In real-world: verify user with DB (or Google login)
-    if (username === "admin" && password === "password123") {
-        // Payload inside the token
-        const payload = { username, role: "admin" };
-
-        // Sign token (expires in 1 hour)
-        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
-
-        return res.json({ success: true, token });
-    }
-
-    res.status(401).json({ success: false, message: "Invalid credentials" });
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
 });
+app.use(limiter);
 
-// ----------------------
-// 2. Middleware to Verify JWT
-// ----------------------
+// CORS Configuration
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
+// Body Parser Middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/payments', require('./routes/paymentRoutes'));
+app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/wishlist', require('./routes/WishListRoutes'));
+app.use('/api/ordered-items', require('./routes/orderedItemRoutes'));
 
-app.get("/protected", authMiddleware, (req, res) => {
-    res.json({
-        message: "This is a protected route",
-        user: req.user,
+// Health Check
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'E-Commerce API is running',
+        timestamp: new Date().toISOString()
     });
 });
 
-const PORT = process.env.PORT || 5000;
-app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/products", require("./routes/productRoutes"));
-app.use("/api/categories", require("./routes/categoryRoutes"));
-app.use("/api/reviews",require("./routes/reviewRoutes"));
-app.use("/api/wishlists",require("./routes/wishlistRoutes"));
-app.use("/api/orders",require("./routes/orderRoutes"));
-app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Something went wrong!',
+        ...(process.env.NODE_ENV === 'development' && { error: err.message })
+    });
 });
+
+// 404 Handler
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
+module.exports = app;
