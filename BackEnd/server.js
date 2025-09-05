@@ -51,14 +51,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Error Handling Middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        success: false,
-        message: 'Something went wrong!',
-        ...(process.env.NODE_ENV === 'development' && { error: err.message })
-    });
-});
+
 
 // 404 Handler
 app.use('*', (req, res) => {
