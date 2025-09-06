@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
-import { loginUser, clearError, clearSuccess, googleAuth } from '../../store/userSlice';
+import { loginUser, clearError, clearSuccess, googleAuth, verifyToken } from '../../store/userSlice';
 import AuthService from "@/service/authService.js";
-
 
 // Mock AuthLayout component
 const AuthLayout = ({ children }) => (
@@ -18,7 +17,7 @@ const AuthLayout = ({ children }) => (
 export default function SignIn() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading, error, success, isAuthenticated } = useSelector((state) => state.user);
+    const { loading, error, success, isAuthenticated, user } = useSelector((state) => state.user);
 
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
@@ -28,22 +27,31 @@ export default function SignIn() {
         rememberMe: false,
     });
 
+    // Check for existing token on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token && !isAuthenticated) {
+            // Verify existing token
+            dispatch(verifyToken(token));
+        }
+    }, [dispatch, isAuthenticated]);
+
     // Redirect if user is already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && user) {
             navigate('/');
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, user, navigate]);
 
     // Handle successful login
     useEffect(() => {
-        if (success) {
+        if (success && isAuthenticated && user) {
             setTimeout(() => {
                 dispatch(clearSuccess());
                 navigate('/'); // Redirect to home page
             }, 1500);
         }
-    }, [success, dispatch, navigate]);
+    }, [success, isAuthenticated, user, dispatch, navigate]);
 
     // Clear errors when component unmounts
     useEffect(() => {
@@ -105,38 +113,73 @@ export default function SignIn() {
         dispatch(clearError());
 
         // Dispatch login action
-        dispatch(loginUser({
-            email: formData.email.trim().toLowerCase(),
-            password: formData.password
-        })).then((action) => {
-            // Store token in sessionStorage if rememberMe is false
-            if (action.meta.requestStatus === 'fulfilled' && action.payload?.token) {
+        try {
+            const result = await dispatch(loginUser({
+                email: formData.email.trim().toLowerCase(),
+                password: formData.password
+            })).unwrap();
+
+            // Store token based on remember me preference
+            if (result.token) {
                 if (formData.rememberMe) {
-                    localStorage.setItem('token', action.payload.token);
+                    localStorage.setItem('token', result.token);
+                    sessionStorage.removeItem('token');
                 } else {
-                    sessionStorage.setItem('token', action.payload.token);
+                    sessionStorage.setItem('token', result.token);
                     localStorage.removeItem('token');
                 }
             }
-        });
+        } catch (error) {
+            // Error is handled by Redux store
+            console.error('Login failed:', error);
+        }
     };
 
     const handleSocialLogin = async (provider) => {
         dispatch(clearError());
         if (provider === 'google') {
-            // Open Google OAuth popup (simulate for now)
             try {
                 // Replace this with real Google OAuth logic
-                const googleToken = await AuthService.getGoogleToken(); // Should open popup and get token
+                const googleToken = await AuthService.getGoogleToken();
                 if (googleToken) {
-                    dispatch(googleAuth(googleToken));
+                    const result = await dispatch(googleAuth(googleToken)).unwrap();
+
+                    // Store token based on remember me preference
+                    if (result.token) {
+                        if (formData.rememberMe) {
+                            localStorage.setItem('token', result.token);
+                            sessionStorage.removeItem('token');
+                        } else {
+                            sessionStorage.setItem('token', result.token);
+                            localStorage.removeItem('token');
+                        }
+                    }
                 }
             } catch (err) {
-                // Handle error
+                console.error('Social login failed:', err);
             }
         }
     };
 
+    const handleSSOLogin = async () => {
+        try {
+            dispatch(clearError());
+
+            // Get SAML login URL from backend
+            const response = await fetch('/api/auth/login-url');
+            const data = await response.json();
+
+            if (data.success && data.loginUrl) {
+                // Redirect to SAML SSO
+                window.location.href = data.loginUrl;
+            } else {
+                throw new Error(data.error || 'Failed to get SSO login URL');
+            }
+        } catch (error) {
+            console.error('SSO login error:', error);
+            // You might want to set an error state here
+        }
+    };
 
     return (
         <AuthLayout>
@@ -163,8 +206,8 @@ export default function SignIn() {
                             <AlertCircle className="h-5 w-5 flex-shrink-0" />
                         )}
                         <span className="text-sm font-medium">
-              {success ? 'Login successful! Redirecting...' : error}
-            </span>
+                            {success ? 'Login successful! Redirecting...' : error}
+                        </span>
                     </div>
                 )}
 
@@ -186,9 +229,19 @@ export default function SignIn() {
                         Continue with Google
                     </button>
 
-
+                    <button
+                        type="button"
+                        onClick={handleSSOLogin}
+                        disabled={loading}
+                        className="w-full h-12 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-md transition-all duration-200 bg-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                        aria-label="Sign in with SSO"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd"/>
+                        </svg>
+                        Continue with SSO
+                    </button>
                 </div>
-
 
                 {/* Divider */}
                 <div className="relative mb-6">

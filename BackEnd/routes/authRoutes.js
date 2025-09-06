@@ -38,8 +38,233 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.post('/refresh-token', refreshToken);
 
-// Protected Routes
+// Get current user profile
+router.get('/profile', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password -refreshToken');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
 
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                address: user.address,
+                profileImage: user.profileImage,
+                isEmailVerified: user.isEmailVerified,
+                role: user.role,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin
+            }
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch user profile'
+        });
+    }
+});
+
+// Update user profile
+router.put('/profile', authMiddleware, async (req, res) => {
+    try {
+        const {
+            firstName,
+            lastName,
+            phone,
+            address,
+            profileImage
+        } = req.body;
+
+        const updateData = {};
+        if (firstName !== undefined) updateData.firstName = firstName;
+        if (lastName !== undefined) updateData.lastName = lastName;
+        if (phone !== undefined) updateData.phone = phone;
+        if (address !== undefined) updateData.address = address;
+        if (profileImage !== undefined) updateData.profileImage = profileImage;
+
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            updateData,
+            { new: true, runValidators: true }
+        ).select('-password -refreshToken');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                address: user.address,
+                profileImage: user.profileImage,
+                isEmailVerified: user.isEmailVerified,
+                role: user.role,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin
+            }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update profile'
+        });
+    }
+});
+
+// Change password
+router.put('/change-password', authMiddleware, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                error: 'Current password and new password are required'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({
+                success: false,
+                error: 'Current password is incorrect'
+            });
+        }
+
+        // Update password
+        user.password = newPassword;
+        await user.save();
+
+        // Clear all refresh tokens to force re-login on other devices
+        await User.findByIdAndUpdate(user._id, { refreshToken: null });
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully. Please log in again.'
+        });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to change password'
+        });
+    }
+});
+
+// Verify token and get user
+router.get('/verify', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password -refreshToken');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                address: user.address,
+                profileImage: user.profileImage,
+                isEmailVerified: user.isEmailVerified,
+                role: user.role,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin
+            }
+        });
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(401).json({
+            success: false,
+            error: 'Invalid token'
+        });
+    }
+});
+
+// Upload profile image endpoint (if you want to handle file uploads)
+router.post('/upload-profile-image', authMiddleware, async (req, res) => {
+    try {
+        // This would typically use multer for file upload handling
+        // For now, we'll just accept a base64 image or URL
+        const { imageUrl } = req.body;
+
+        if (!imageUrl) {
+            return res.status(400).json({
+                success: false,
+                error: 'Image URL is required'
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            { profileImage: imageUrl },
+            { new: true }
+        ).select('-password -refreshToken');
+
+        res.json({
+            success: true,
+            message: 'Profile image updated successfully',
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                address: user.address,
+                profileImage: user.profileImage,
+                isEmailVerified: user.isEmailVerified,
+                role: user.role,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin
+            }
+        });
+    } catch (error) {
+        console.error('Upload profile image error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update profile image'
+        });
+    }
+});
 
 // SAML SSO Initiation
 router.get('/sso', passport.authenticate('saml', {

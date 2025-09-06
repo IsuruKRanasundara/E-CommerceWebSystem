@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Facebook, Chrome, Phone, MapPin } from 'lucide-react';
-import { registerUser, clearError, clearSuccess, googleAuth } from '@/store/userSlice.js';
-import {API_ENDPOINTS} from "@/utils/constants.js";
+import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Chrome, Phone, MapPin } from 'lucide-react';
+import { registerUser, clearError, clearSuccess, googleAuth, verifyToken } from '@/store/userSlice.js';
+import AuthService from "@/service/authService.js";
 
 const SignUp = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading, error, success, isAuthenticated } = useSelector((state) => state.user);
+    const { loading, error, success, isAuthenticated, user } = useSelector((state) => state.user);
 
     const [formData, setFormData] = useState({
         username: '',
@@ -31,12 +31,21 @@ const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Check for existing token on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token && !isAuthenticated) {
+            // Verify existing token
+            dispatch(verifyToken(token));
+        }
+    }, [dispatch, isAuthenticated]);
+
     // Redirect if user is already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && user) {
             navigate('/'); // Redirect to home if already authenticated
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, user, navigate]);
 
     // Handle successful registration
     useEffect(() => {
@@ -45,7 +54,7 @@ const SignUp = () => {
             setTimeout(() => {
                 dispatch(clearSuccess());
                 navigate('/signIn'); // Redirect to sign in page for verification
-            }, 2000);
+            }, 3000);
         }
     }, [success, dispatch, navigate]);
 
@@ -64,16 +73,22 @@ const SignUp = () => {
             newErrors.username = 'Username is required';
         } else if (formData.username.length < 3) {
             newErrors.username = 'Username must be at least 3 characters';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+            newErrors.username = 'Username can only contain letters, numbers, and underscores';
         }
 
         // First name validation
         if (!formData.firstName.trim()) {
             newErrors.firstName = 'First name is required';
+        } else if (formData.firstName.length < 2) {
+            newErrors.firstName = 'First name must be at least 2 characters';
         }
 
         // Last name validation
         if (!formData.lastName.trim()) {
             newErrors.lastName = 'Last name is required';
+        } else if (formData.lastName.length < 2) {
+            newErrors.lastName = 'Last name must be at least 2 characters';
         }
 
         // Email validation
@@ -87,8 +102,10 @@ const SignUp = () => {
         // Password validation
         if (!formData.password) {
             newErrors.password = 'Password is required';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters';
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+            newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
         }
 
         // Confirm password validation
@@ -175,22 +192,54 @@ const SignUp = () => {
         }
 
         // Dispatch the register action
-        dispatch(registerUser(userData));
-    };
-
-    const handleSocialLogin = async () => {
-        dispatch(clearError());
         try {
-            // Replace this with real Google OAuth logic
-            const googleToken = await window.AuthService.getGoogleToken(); // Or import AuthService if available
-            if (googleToken) {
-                dispatch(googleAuth(googleToken));
-            }
-        } catch (err) {
-            // Handle error
+            await dispatch(registerUser(userData)).unwrap();
+        } catch (error) {
+            // Error is handled by Redux store
+            console.error('Registration failed:', error);
         }
     };
 
+    const handleSocialLogin = async (provider) => {
+        dispatch(clearError());
+        if (provider === 'google') {
+            try {
+                // Replace this with real Google OAuth logic
+                const googleToken = await AuthService.getGoogleToken();
+                if (googleToken) {
+                    const result = await dispatch(googleAuth(googleToken)).unwrap();
+
+                    // Store token
+                    if (result.token) {
+                        localStorage.setItem('token', result.token);
+                        sessionStorage.removeItem('token');
+                    }
+                }
+            } catch (err) {
+                console.error('Social registration failed:', err);
+            }
+        }
+    };
+
+    const handleSSORegistration = async () => {
+        try {
+            dispatch(clearError());
+
+            // Get SAML login URL from backend
+            const response = await fetch('/api/auth/login-url');
+            const data = await response.json();
+
+            if (data.success && data.loginUrl) {
+                // Redirect to SAML SSO
+                window.location.href = data.loginUrl;
+            } else {
+                throw new Error(data.error || 'Failed to get SSO login URL');
+            }
+        } catch (error) {
+            console.error('SSO registration error:', error);
+            // You might want to set an error state here
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
@@ -221,15 +270,15 @@ const SignUp = () => {
                                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
                             )}
                             <span className="text-sm">
-                {success ? 'Account created successfully! Please check your email to verify your account.' : error}
-              </span>
+                                {success ? 'Account created successfully! Please check your email to verify your account. Redirecting to sign in...' : error}
+                            </span>
                         </div>
                     )}
 
                     {/* Social Login Buttons */}
                     <div className="space-y-3 mb-6">
                         <button
-                            onClick={() => handleSocialLogin('Google')}
+                            onClick={() => handleSocialLogin('google')}
                             className="w-full flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                             type="button"
                             disabled={loading}
@@ -238,7 +287,17 @@ const SignUp = () => {
                             <span className="text-gray-700 font-medium">Continue with Google</span>
                         </button>
 
-
+                        <button
+                            onClick={handleSSORegistration}
+                            className="w-full flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                            type="button"
+                            disabled={loading}
+                        >
+                            <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd"/>
+                            </svg>
+                            <span className="text-gray-700 font-medium">Continue with SSO</span>
+                        </button>
                     </div>
 
                     {/* Divider */}
@@ -468,6 +527,9 @@ const SignUp = () => {
                                     {errors.password}
                                 </p>
                             )}
+                            <div className="mt-1 text-xs text-gray-500">
+                                Password must be at least 8 characters with uppercase, lowercase, and number
+                            </div>
                         </div>
 
                         {/* Confirm Password Field */}
@@ -520,15 +582,15 @@ const SignUp = () => {
                                     disabled={loading}
                                 />
                                 <span className="text-sm text-gray-600">
-                  I agree to the{' '}
+                                    I agree to the{' '}
                                     <Link to="/terms" className="text-orange-600 hover:text-orange-700 underline">
-                    Terms of Service
-                  </Link>{' '}
+                                        Terms of Service
+                                    </Link>{' '}
                                     and{' '}
                                     <Link to="/privacy" className="text-orange-600 hover:text-orange-700 underline">
-                    Privacy Policy
-                  </Link>
-                </span>
+                                        Privacy Policy
+                                    </Link>
+                                </span>
                             </label>
                             {errors.agreeToTerms && (
                                 <p id="terms-error" className="text-red-500 text-xs mt-1" role="alert">
@@ -541,7 +603,6 @@ const SignUp = () => {
                         <button
                             type="submit"
                             disabled={loading}
-
                             className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (
@@ -571,4 +632,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
