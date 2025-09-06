@@ -1,5 +1,10 @@
 
 import { AlertCircle } from "lucide-react";
+import {Card} from "@material-tailwind/react";
+
+function CardContent(props) {
+    return null;
+}
 
 export default function NotFound() {
   return (

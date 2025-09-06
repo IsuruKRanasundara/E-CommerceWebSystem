@@ -74,6 +74,15 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
+        login: (state,action) => {
+            AuthService.login(state, action.payload);
+          state.user = action.payload;
+          state.token = action.payload;
+          state.isAuthenticated = action.payload;
+          state.loading = true;
+          state.error = action.payload;
+          state.success = action.payload;
+        },
         // Clear error messages
         clearError: (state) => {
             state.error = null;
@@ -204,7 +213,8 @@ export const {
     clearSuccess,
     logoutUser,
     resetUserState,
-    setUserFromStorage
+    setUserFromStorage,
+    login
 } = userSlice.actions;
 
-export default userSlice.reducer;
+export const authReducer= userSlice.reducer;

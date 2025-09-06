@@ -2,20 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/authMiddleware');
-const { createUser, loginUser, getAllUsers, updateUser, getUserById, deleteUser } = require('../controller/userController');
+const {  getAllUsers, updateUser, getUserById, deleteUser } = require('../controller/userController');
 const { allowOnlyAdmin } = require('../middleware/roleMiddleware');
 
-// Auth middleware to check if user is authenticated
-const isAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.status(401).json({ message: 'User is not authenticated' });
-};
 
-// Public routes
-router.post('/register', createUser);
-router.post('/login', loginUser); // FIXED: Changed from GET to POST
 
 // Protected route to check authentication
 router.get('/check-auth', authMiddleware, (req, res) => {
@@ -23,7 +13,7 @@ router.get('/check-auth', authMiddleware, (req, res) => {
         message: 'Authenticated',
         user: {
             _id: req.user._id,
-            name: req.user.name,
+            username: req.user.username,
             email: req.user.email,
             role: req.user.role
         }
@@ -31,9 +21,17 @@ router.get('/check-auth', authMiddleware, (req, res) => {
 });
 
 // Admin and protected routes
-router.get('/profile/', allowOnlyAdmin, authMiddleware, getAllUsers);
+router.get('/profile/', authMiddleware, allowOnlyAdmin, getAllUsers);
 router.get('/profile/:id', authMiddleware, getUserById);
-router.delete('/profile/:id', allowOnlyAdmin, authMiddleware, deleteUser);
+router.delete('/profile/:id', authMiddleware, allowOnlyAdmin, deleteUser);
 router.put('/profile/:id', authMiddleware, updateUser);
+
+// Fallback for undefined handlers (debugging)
+router.use((req, res, next) => {
+    if (typeof req.route.stack[req.route.stack.length - 1].handle !== 'function') {
+        return res.status(500).json({ success: false, message: 'Route handler is not a function' });
+    }
+    next();
+});
 
 module.exports = router;

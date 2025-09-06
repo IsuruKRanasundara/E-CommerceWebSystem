@@ -28,7 +28,7 @@ const validateProduct = [
     handleValidationErrors
 ];
 
-const validateLogin = [
+const validateLoginUser = [
     body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
     body('password').notEmpty().withMessage('Password is required'),
     handleValidationErrors
@@ -37,6 +37,6 @@ const validateLogin = [
 module.exports = {
     validateUser,
     validateProduct,
-    validateLogin,
-    handleValidationErrors
+    validateLoginUser,
+
 };

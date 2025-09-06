@@ -12,7 +12,6 @@ const {
 //Public Routes
 
 router.post('/', authMiddleware, createPayment); // Create a new payment
-router.get('/',getAllPayment);
-router.get('/:id',authMiddleware,getPayment);
+
 
 module.exports=router;
