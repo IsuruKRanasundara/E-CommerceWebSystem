@@ -61,6 +61,19 @@ export const verifyToken = createAsyncThunk(
     }
 );
 
+// Async thunk for Google sign-in/up
+export const googleAuth = createAsyncThunk(
+    'user/googleAuth',
+    async (googleToken, { rejectWithValue }) => {
+        try {
+            // This should call your backend endpoint to exchange Google token for app token/user
+            return await AuthService.googleAuth(googleToken);
+        } catch (error) {
+            return rejectWithValue(error.message || 'Google authentication failed');
+        }
+    }
+);
+
 const initialState = {
     user: AuthService.getCurrentUser(),
     token: localStorage.getItem('token'),
@@ -90,6 +103,9 @@ const userSlice = createSlice({
             state.isAuthenticated = false;
             state.error = null;
             state.success = false;
+            // Remove from localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
         },
         // Reset user state
         resetUserState: (state) => {
@@ -119,6 +135,9 @@ const userSlice = createSlice({
                     if (action.payload.token) {
                         state.token = action.payload.token;
                         state.isAuthenticated = true;
+                        // Persist token and user in localStorage
+                        localStorage.setItem('token', action.payload.token);
+                        localStorage.setItem('user', JSON.stringify(action.payload.user));
                     }
                     state.success = true;
                     state.error = null;
@@ -131,6 +150,9 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
                 state.success = false;
+                // Clear token/user on failed register
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
             })
 
             // Login user cases
@@ -147,6 +169,9 @@ const userSlice = createSlice({
                     state.isAuthenticated = true;
                     state.success = true;
                     state.error = null;
+                    // Persist token and user in localStorage
+                    localStorage.setItem('token', action.payload.token);
+                    localStorage.setItem('user', JSON.stringify(action.payload.user));
                 } else {
                     state.error = action.payload.message;
                     state.success = false;
@@ -156,6 +181,9 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
                 state.success = false;
+                // Clear token/user on failed login
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
             })
 
             // Get user profile cases
@@ -207,6 +235,34 @@ const userSlice = createSlice({
                 state.user = null;
                 state.token = null;
                 state.error = action.payload;
+            })
+
+            // Google Auth cases
+            .addCase(googleAuth.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.success = false;
+            })
+            .addCase(googleAuth.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload.success) {
+                    state.user = action.payload.user;
+                    state.token = action.payload.token;
+                    state.isAuthenticated = true;
+                    state.success = true;
+                    state.error = null;
+                    // Persist token and user in localStorage
+                    localStorage.setItem('token', action.payload.token);
+                    localStorage.setItem('user', JSON.stringify(action.payload.user));
+                } else {
+                    state.error = action.payload.message;
+                    state.success = false;
+                }
+            })
+            .addCase(googleAuth.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+                state.success = false;
             });
     },
 });

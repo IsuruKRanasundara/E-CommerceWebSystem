@@ -53,17 +53,17 @@ const registerUser = async (req, res) => {
         });
 
         await user.save();
-
+        console.log(user);
         // Send verification email
-        await sendEmail({
-            to: email,
-            subject: 'Verify Your Email',
-            template: 'verification',
-            data: {
-                username,
-                verificationLink: `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`
-            }
-        });
+        // await sendEmail({
+        //     to: email,
+        //     subject: 'Verify Your Email',
+        //     template: 'verification',
+        //     data: {
+        //         username,
+        //         verificationLink: `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`
+        //     }
+        // });
 
         res.status(201).json({
             success: true,

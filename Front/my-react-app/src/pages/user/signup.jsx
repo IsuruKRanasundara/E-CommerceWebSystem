@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Facebook, Chrome, Phone, MapPin } from 'lucide-react';
-import { registerUser, clearError, clearSuccess } from '@/store/userSlice.js';
+import { registerUser, clearError, clearSuccess, googleAuth } from '@/store/userSlice.js';
 import {API_ENDPOINTS} from "@/utils/constants.js";
 
 const SignUp = () => {
@@ -34,7 +34,7 @@ const SignUp = () => {
     // Redirect if user is already authenticated
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/signUp');
+            navigate('/'); // Redirect to home if already authenticated
         }
     }, [isAuthenticated, navigate]);
 
@@ -178,8 +178,17 @@ const SignUp = () => {
         dispatch(registerUser(userData));
     };
 
-    const handleSocialLogin = () => {
-        navigate(API_ENDPOINTS.AUTH.GOOGLE);
+    const handleSocialLogin = async () => {
+        dispatch(clearError());
+        try {
+            // Replace this with real Google OAuth logic
+            const googleToken = await window.AuthService.getGoogleToken(); // Or import AuthService if available
+            if (googleToken) {
+                dispatch(googleAuth(googleToken));
+            }
+        } catch (err) {
+            // Handle error
+        }
     };
 
 
@@ -562,3 +571,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
