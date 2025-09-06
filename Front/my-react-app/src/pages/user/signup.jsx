@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Facebook, Chrome, Phone, MapPin } from 'lucide-react';
-import { registerUser, clearError, clearSuccess } from '../../store/userSlice.js';
+import { registerUser, clearError, clearSuccess } from '@/store/userSlice.js';
+import {API_ENDPOINTS} from "@/utils/constants.js";
 
 const SignUp = () => {
     const dispatch = useDispatch();
@@ -10,7 +11,9 @@ const SignUp = () => {
     const { loading, error, success, isAuthenticated } = useSelector((state) => state.user);
 
     const [formData, setFormData] = useState({
-        name: '',
+        username: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: '',
@@ -31,7 +34,7 @@ const SignUp = () => {
     // Redirect if user is already authenticated
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/');
+            navigate('/signUp');
         }
     }, [isAuthenticated, navigate]);
 
@@ -41,7 +44,7 @@ const SignUp = () => {
             // Clear the success state after a delay
             setTimeout(() => {
                 dispatch(clearSuccess());
-                navigate('/'); // Redirect to home page
+                navigate('/signIn'); // Redirect to sign in page for verification
             }, 2000);
         }
     }, [success, dispatch, navigate]);
@@ -56,11 +59,21 @@ const SignUp = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        // Name validation
-        if (!formData.name.trim()) {
-            newErrors.name = 'Full name is required';
-        } else if (formData.name.length < 2) {
-            newErrors.name = 'Name must be at least 2 characters';
+        // Username validation
+        if (!formData.username.trim()) {
+            newErrors.username = 'Username is required';
+        } else if (formData.username.length < 3) {
+            newErrors.username = 'Username must be at least 3 characters';
+        }
+
+        // First name validation
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = 'First name is required';
+        }
+
+        // Last name validation
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = 'Last name is required';
         }
 
         // Email validation
@@ -142,39 +155,33 @@ const SignUp = () => {
 
         // Prepare user data for submission
         const userData = {
-            name: formData.name.trim(),
+            username: formData.username.trim(),
+            firstName: formData.firstName.trim(),
+            lastName: formData.lastName.trim(),
             email: formData.email.trim().toLowerCase(),
             password: formData.password,
             phone: formData.phone.trim(),
-            address: {
+        };
+
+        // Only include address if at least one field is filled
+        const addressFields = Object.values(formData.address).filter(field => field.trim());
+        if (addressFields.length > 0) {
+            userData.address = {
                 street: formData.address.street.trim(),
                 city: formData.address.city.trim(),
                 state: formData.address.state.trim(),
                 postalCode: formData.address.postalCode.trim()
-            }
-        };
-
-        // Remove empty address fields
-        Object.keys(userData.address).forEach(key => {
-            if (!userData.address[key]) {
-                delete userData.address[key];
-            }
-        });
-
-        // If address object is empty, don't send it
-        if (Object.keys(userData.address).length === 0) {
-            delete userData.address;
+            };
         }
 
         // Dispatch the register action
         dispatch(registerUser(userData));
     };
 
-    const handleSocialLogin = (provider) => {
-        // In a real app, this would redirect to OAuth provider
-        console.log(`Connecting with ${provider}...`);
-        // You can implement social login here
+    const handleSocialLogin = () => {
+        navigate(API_ENDPOINTS.AUTH.GOOGLE);
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
@@ -205,7 +212,7 @@ const SignUp = () => {
                                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
                             )}
                             <span className="text-sm">
-                {success ? 'Account created successfully! Redirecting...' : error}
+                {success ? 'Account created successfully! Please check your email to verify your account.' : error}
               </span>
                         </div>
                     )}
@@ -222,15 +229,7 @@ const SignUp = () => {
                             <span className="text-gray-700 font-medium">Continue with Google</span>
                         </button>
 
-                        <button
-                            onClick={() => handleSocialLogin('Facebook')}
-                            className="w-full flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                            type="button"
-                            disabled={loading}
-                        >
-                            <Facebook className="h-5 w-5 text-blue-600" />
-                            <span className="text-gray-700 font-medium">Continue with Facebook</span>
-                        </button>
+
                     </div>
 
                     {/* Divider */}
@@ -245,32 +244,81 @@ const SignUp = () => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Name Field */}
+                        {/* Username Field */}
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                Full Name *
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                                Username *
                             </label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <input
-                                    id="name"
-                                    name="name"
+                                    id="username"
+                                    name="username"
                                     type="text"
-                                    value={formData.name}
+                                    value={formData.username}
                                     onChange={handleInputChange}
                                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                                        errors.name ? 'border-red-500' : 'border-gray-300'
+                                        errors.username ? 'border-red-500' : 'border-gray-300'
                                     }`}
-                                    placeholder="Enter your full name"
-                                    aria-describedby={errors.name ? 'name-error' : undefined}
+                                    placeholder="Enter your username"
+                                    aria-describedby={errors.username ? 'username-error' : undefined}
                                     disabled={loading}
                                 />
                             </div>
-                            {errors.name && (
-                                <p id="name-error" className="text-red-500 text-xs mt-1" role="alert">
-                                    {errors.name}
+                            {errors.username && (
+                                <p id="username-error" className="text-red-500 text-xs mt-1" role="alert">
+                                    {errors.username}
                                 </p>
                             )}
+                        </div>
+
+                        {/* Name Fields */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                                    First Name *
+                                </label>
+                                <input
+                                    id="firstName"
+                                    name="firstName"
+                                    type="text"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                                        errors.firstName ? 'border-red-500' : 'border-gray-300'
+                                    }`}
+                                    placeholder="First name"
+                                    disabled={loading}
+                                />
+                                {errors.firstName && (
+                                    <p className="text-red-500 text-xs mt-1" role="alert">
+                                        {errors.firstName}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Last Name *
+                                </label>
+                                <input
+                                    id="lastName"
+                                    name="lastName"
+                                    type="text"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                                        errors.lastName ? 'border-red-500' : 'border-gray-300'
+                                    }`}
+                                    placeholder="Last name"
+                                    disabled={loading}
+                                />
+                                {errors.lastName && (
+                                    <p className="text-red-500 text-xs mt-1" role="alert">
+                                        {errors.lastName}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Email Field */}
@@ -484,6 +532,7 @@ const SignUp = () => {
                         <button
                             type="submit"
                             disabled={loading}
+
                             className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (

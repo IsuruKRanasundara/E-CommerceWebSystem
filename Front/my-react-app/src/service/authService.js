@@ -1,9 +1,12 @@
-const API_BASE_URL =   'http://localhost:3001/api';
+/* eslint-disable */
+import {API_ENDPOINTS} from "@/utils/constants.js";
+
+const API_BASE_URL =  'http://localhost:3001/api';
 
 class AuthService {
     // Register
     async register(userData) {
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -12,6 +15,42 @@ class AuthService {
         });
         return response.json();
     }
+    async initiateSSO() {
+        window.location.href = `${API_BASE_URL}/auth/saml/sso`;
+    }async getSamlLoginUrl() {
+        const response = await fetch(`${API_BASE_URL}/auth/saml/login-url`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.json();
+    }
+
+    // Handle SAML Callback
+    async handleSamlCallback(token) {
+        if (token) {
+            localStorage.setItem('token', token);
+
+            // Get user info with the token
+            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                localStorage.setItem('user', JSON.stringify(userData.user));
+                return { success: true, user: userData.user, token };
+            }
+        }
+
+        return { success: false };
+    }
+
+
+
 
     // Login
     async login(credentials) {

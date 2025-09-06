@@ -1,4 +1,3 @@
-// src/hooks/useAuth.js
 import { useDispatch, useSelector } from 'react-redux';
 import {
     setUser,
@@ -8,7 +7,8 @@ import {
     selectCurrentUser,
     selectIsAuthenticated,
     selectAuthLoading,
-    selectAuthError
+    selectAuthError,
+    logoutUser as logoutAction
 } from '../store/userSlice.js';
 
 export function useAuth() {
@@ -31,7 +31,7 @@ export function useAuth() {
     };
 
     const logout = () => {
-        dispatch(clearUser());
+        dispatch(logoutAction());
     };
 
     return {
@@ -41,5 +41,17 @@ export function useAuth() {
         error,
         login,
         logout
+    };
+}
+
+// Additional hook for logout functionality
+export function useLogout() {
+    const dispatch = useDispatch();
+
+    return {
+        mutateAsync: async () => {
+            dispatch(logoutAction());
+        },
+        isPending: false
     };
 }

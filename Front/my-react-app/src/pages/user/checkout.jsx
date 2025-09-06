@@ -73,8 +73,9 @@ const Checkout = () => {
                     }
                 }
             });
+            console.log(this.existingItem);
         } catch (error) {
-            alert("Error processing order");
+            alert("Error processing order"+error);
         } finally {
             // Re-enable button
             const submitButton = e.target.querySelector('button[type="submit"]');

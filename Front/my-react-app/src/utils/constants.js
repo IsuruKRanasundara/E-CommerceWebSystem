@@ -1,24 +1,26 @@
 // src/utils/constants.js
+export const API_BASE_URL = 'http://localhost:3001/api';
+
 export const API_ENDPOINTS = {
     AUTH: {
-        LOGIN: '/auth/login',
-        REGISTER: '/auth/register',
-        LOGOUT: '/auth/logout',
-        REFRESH: '/auth/refresh',
-        GOOGLE: '/auth/google',
+        LOGIN: `${API_BASE_URL}/auth/login`,
+        REGISTER: `${API_BASE_URL}/auth/register`,
+        LOGOUT: `${API_BASE_URL}/auth/logout`,
+        REFRESH: `${API_BASE_URL}/auth/refresh`,
+        GOOGLE: `${API_BASE_URL}/auth/google`,
     },
     PRODUCTS: {
-        BASE: '/products',
-        SEARCH: '/products/search',
-        CATEGORY: '/products/category',
+        BASE: `${API_BASE_URL}/products`,
+        SEARCH: `${API_BASE_URL}/products/search`,
+        CATEGORY: `${API_BASE_URL}/products/category`,
     },
     ORDERS: {
-        BASE: '/orders',
-        USER_ORDERS: '/orders/user',
+        BASE: `${API_BASE_URL}/orders`,
+        USER_ORDERS: `${API_BASE_URL}/orders/user`,
     },
     USERS: {
-        PROFILE: '/users/profile',
-        CHANGE_PASSWORD: '/users/change-password',
+        PROFILE: `${API_BASE_URL}/users/profile`,
+        CHANGE_PASSWORD: `${API_BASE_URL}/users/change-password`,
     },
 };
 

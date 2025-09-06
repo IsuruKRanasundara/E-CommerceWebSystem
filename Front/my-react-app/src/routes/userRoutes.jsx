@@ -11,6 +11,7 @@ import ModernNavigationBar from "@/component/common/navBar.jsx";
 import EcommerceServices from "@/pages/user/service.jsx";
 import Checkout from "@/pages/user/checkout.jsx";
 
+
 function MainNavRoute() {
     return (
         <>
@@ -27,6 +28,7 @@ function MainNavRoute() {
                     <Route path="/contact" element={<ContactUs />} />
                     <Route path="/services" element={<EcommerceServices/>} />
                     <Route path="/checkout" element={<Checkout />} />
+
                 </Routes>
             </section>
             <footer>

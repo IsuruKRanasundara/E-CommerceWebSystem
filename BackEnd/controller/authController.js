@@ -2,9 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../model/User');
-const sendEmail = async () => {
-
-}; // Remove this if you have a real sendEmail
+const { sendEmail } = require('../utils/sendEmail');
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -12,10 +10,9 @@ const generateToken = (userId) => {
         expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
 };
-
 // Generate Refresh Token
 const generateRefreshToken = () => {
-    return jwt.sign({}, process.env.JWT_SECRET, {
+    return jwt.sign({}, process.env.JWT_REFRESH_SECRET, {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
     });
 };
@@ -92,10 +89,10 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(email, password);
+
         // Find user by email
         const user = await User.findOne({ email }).select('+password');
-        console.log(user)
+
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -358,13 +355,6 @@ const changePassword = async (req, res) => {
 
         const user = await User.findById(req.user.id).select('+password');
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
         // Verify current password
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
@@ -479,5 +469,6 @@ module.exports = {
     verifyEmail,
     resendVerificationEmail,
     changePassword,
-    validateToken
+    validateToken,
+
 };

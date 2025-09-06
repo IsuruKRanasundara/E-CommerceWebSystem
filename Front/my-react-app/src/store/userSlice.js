@@ -18,7 +18,7 @@ export const loginUser = createAsyncThunk(
     'user/login',
     async ({ email, password }, { rejectWithValue }) => {
         try {
-            return await AuthService.login(email, password);
+            return await AuthService.login({ email, password });
         } catch (error) {
             return rejectWithValue(error.message || 'Login failed');
         }
@@ -74,15 +74,6 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        login: (state,action) => {
-            AuthService.login(state, action.payload);
-          state.user = action.payload;
-          state.token = action.payload;
-          state.isAuthenticated = action.payload;
-          state.loading = true;
-          state.error = action.payload;
-          state.success = action.payload;
-        },
         // Clear error messages
         clearError: (state) => {
             state.error = null;
@@ -123,11 +114,18 @@ const userSlice = createSlice({
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-                state.isAuthenticated = true;
-                state.success = true;
-                state.error = null;
+                if (action.payload.success) {
+                    state.user = action.payload.user;
+                    if (action.payload.token) {
+                        state.token = action.payload.token;
+                        state.isAuthenticated = true;
+                    }
+                    state.success = true;
+                    state.error = null;
+                } else {
+                    state.error = action.payload.message;
+                    state.success = false;
+                }
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -143,11 +141,16 @@ const userSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-                state.isAuthenticated = true;
-                state.success = true;
-                state.error = null;
+                if (action.payload.success) {
+                    state.user = action.payload.user;
+                    state.token = action.payload.token;
+                    state.isAuthenticated = true;
+                    state.success = true;
+                    state.error = null;
+                } else {
+                    state.error = action.payload.message;
+                    state.success = false;
+                }
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -213,8 +216,13 @@ export const {
     clearSuccess,
     logoutUser,
     resetUserState,
-    setUserFromStorage,
-    login
+    setUserFromStorage
 } = userSlice.actions;
 
-export const authReducer= userSlice.reducer;
+// Selectors
+export const selectCurrentUser = (state) => state.user.user;
+export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
+export const selectAuthLoading = (state) => state.user.loading;
+export const selectAuthError = (state) => state.user.error;
+
+export const authReducer = userSlice.reducer;

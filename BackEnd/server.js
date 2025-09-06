@@ -22,7 +22,7 @@ app.use('/api/', limiter); // apply only to API routes
 connectDB();
 // ---------------- CORS Configuration ----------------
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // removed trailing slash
+    origin:  'http://localhost:5173', // removed trailing slash
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
