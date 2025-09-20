@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Chrome, Phone, MapPin } from 'lucide-react';
-import { registerUser, clearError, clearSuccess, googleAuth, verifyToken } from '@/store/userSlice.js';
+import { clearError, clearSuccess } from '@/store/userSlice.js';
 import AuthService from "@/service/authService.js";
 
 const SignUp = () => {
@@ -193,7 +193,7 @@ const SignUp = () => {
 
         // Dispatch the register action
         try {
-            await dispatch(registerUser(userData)).unwrap();
+            await dispatch(AuthService.register(userData)).unwrap();
         } catch (error) {
             // Error is handled by Redux store
             console.error('Registration failed:', error);
@@ -207,7 +207,7 @@ const SignUp = () => {
                 // Replace this with real Google OAuth logic
                 const googleToken = await AuthService.getGoogleToken();
                 if (googleToken) {
-                    const result = await dispatch(googleAuth(googleToken)).unwrap();
+                    const result = await dispatch(AuthService.googleAuth(googleToken)).unwrap();
 
                     // Store token
                     if (result.token) {
@@ -224,20 +224,16 @@ const SignUp = () => {
     const handleSSORegistration = async () => {
         try {
             dispatch(clearError());
-
-            // Get SAML login URL from backend
-            const response = await fetch('/api/auth/login-url');
-            const data = await response.json();
-
+            // Use AuthService to get SSO login URL
+            const response = await AuthService.getSAMLLoginUrl();
+            const data = response.data;
             if (data.success && data.loginUrl) {
-                // Redirect to SAML SSO
                 window.location.href = data.loginUrl;
             } else {
                 throw new Error(data.error || 'Failed to get SSO login URL');
             }
         } catch (error) {
             console.error('SSO registration error:', error);
-            // You might want to set an error state here
         }
     };
 
@@ -632,3 +628,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

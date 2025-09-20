@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SSO_LOGIN_URL, GOOGLE_CLIENT_ID } from '@/utils/constants';
 
 // Create axios instance with base configuration
 const API = axios.create({
@@ -170,15 +171,14 @@ class AuthService {
             // Example using Google Identity Services
             if (window.google && window.google.accounts) {
                 window.google.accounts.id.initialize({
-                    client_id: '514168454442-8n8em5guvcfv2qvvnetqoco16fp5i1p9.apps.googleusercontent.com',
+                    client_id: GOOGLE_CLIENT_ID,
                     callback: (response) => {
                         resolve(response.credential);
                     },
                     error_callback: (error) => {
-                        reject(new Error('Google authentication failed',error));
+                        reject(new Error('Google authentication failed', error));
                     }
                 });
-
                 window.google.accounts.id.prompt();
             } else {
                 // Fallback: open Google OAuth popup
@@ -305,7 +305,7 @@ class AuthService {
     async getSAMLLoginUrl() {
         // eslint-disable-next-line no-useless-catch
         try {
-            const response = await API.get('/auth/login-url');
+            const response = await axios.get(SSO_LOGIN_URL);
             return response;
         } catch (error) {
             throw error;

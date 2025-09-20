@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from 'lucide-react';
-import {existingItem} from "@/pages/user/products.jsx";
+
 
 const Checkout = () => {
     const navigate = useNavigate();

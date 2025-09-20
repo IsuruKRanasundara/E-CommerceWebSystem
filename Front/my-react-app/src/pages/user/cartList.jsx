@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { ShoppingCart, Plus, Minus, Trash2, X } from 'lucide-react';
 import {useNavigate} from "react-router-dom";
-import {existingItem} from "@/pages/user/products.jsx";
 
 export default function CartList() {
     const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +44,7 @@ export default function CartList() {
     const removeItem = (id) => {
         const updatedCart = cartItems.filter(item => item.id !== id);
         syncCart(updatedCart);
+
     };
 
     const clearCart = () => {

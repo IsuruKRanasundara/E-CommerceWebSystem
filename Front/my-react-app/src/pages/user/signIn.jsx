@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
-import { loginUser, clearError, clearSuccess, googleAuth, verifyToken } from '../../store/userSlice';
+import { clearError, clearSuccess } from '@/store/userSlice.js';
 import AuthService from "@/service/authService.js";
 
 // Mock AuthLayout component
@@ -32,7 +32,7 @@ export default function SignIn() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token && !isAuthenticated) {
             // Verify existing token
-            dispatch(verifyToken(token));
+            dispatch(AuthService.verifyToken(token));
         }
     }, [dispatch, isAuthenticated]);
 
@@ -114,10 +114,10 @@ export default function SignIn() {
 
         // Dispatch login action
         try {
-            const result = await dispatch(loginUser({
+            const result = await dispatch(AuthService.login({
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password
-            })).unwrap();
+            }));
 
             // Store token based on remember me preference
             if (result.token) {
@@ -142,7 +142,7 @@ export default function SignIn() {
                 // Replace this with real Google OAuth logic
                 const googleToken = await AuthService.getGoogleToken();
                 if (googleToken) {
-                    const result = await dispatch(googleAuth(googleToken)).unwrap();
+                    const result = await dispatch(AuthService.googleAuth(googleToken)).unwrap();
 
                     // Store token based on remember me preference
                     if (result.token) {
@@ -164,20 +164,16 @@ export default function SignIn() {
     const handleSSOLogin = async () => {
         try {
             dispatch(clearError());
-
-            // Get SAML login URL from backend
-            const response = await fetch('/api/auth/login-url');
-            const data = await response.json();
-
+            // Use AuthService to get SSO login URL
+            const response = await AuthService.getSAMLLoginUrl();
+            const data = response.data;
             if (data.success && data.loginUrl) {
-                // Redirect to SAML SSO
                 window.location.href = data.loginUrl;
             } else {
                 throw new Error(data.error || 'Failed to get SSO login URL');
             }
         } catch (error) {
             console.error('SSO login error:', error);
-            // You might want to set an error state here
         }
     };
 

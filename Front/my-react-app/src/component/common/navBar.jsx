@@ -3,8 +3,7 @@ import { Menu, X, Search, User, ShoppingCart, Bell, ChevronDown, LogOut, Setting
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import NotificationPanel from '../../pages/user/notificationPanel';
-import { existingItem } from "@/pages/user/products.jsx";
-import { logoutUser, clearError } from '../../store/userSlice';
+import { clearError, logoutUser } from '@/store/userSlice.js';
 
 // User Account Dropdown Component
 const UserAccountDropdown = ({ isOpen, onClose, user, onLogout, navigate }) => (
@@ -106,7 +105,7 @@ const UserAccountDropdown = ({ isOpen, onClose, user, onLogout, navigate }) => (
     </>
 );
 
-// CartSidebar Component (unchanged)
+// CartSidebar Component
 const CartSidebar = ({ isOpen, onClose, cartItems, navigate, updateQuantity, removeItem, getTotal }) => (
     <>
         {isOpen && (
@@ -208,7 +207,8 @@ const CartSidebar = ({ isOpen, onClose, cartItems, navigate, updateQuantity, rem
 
 export default function ModernNavbar() {
     const dispatch = useDispatch();
-    const { user, isAuthenticated, loading } = useSelector((state) => state.user);
+    const { user, isAuthenticated } = useSelector((state) => state.user);
+    const cart = useSelector((state) => state.cart || { items: [] });
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -221,21 +221,10 @@ export default function ModernNavbar() {
 
     // Sync with global cart state
     useEffect(() => {
-        const interval = setInterval(() => {
-            if (existingItem && existingItem.items) {
-                setCartItems([...existingItem.items]);
-            }
-        }, 100);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Initial load
-    useEffect(() => {
-        if (existingItem && existingItem.items) {
-            setCartItems([...existingItem.items]);
+        if (cart && cart.items) {
+            setCartItems([...cart.items]);
         }
-    }, []);
+    }, [cart]);
 
     // Close user menu when clicking outside
     useEffect(() => {
@@ -259,7 +248,8 @@ export default function ModernNavbar() {
     ];
 
     const syncCart = (updatedCart) => {
-        existingItem.items = updatedCart;
+        // Dispatch action to update cart in Redux store
+        // dispatch(updateCart(updatedCart));
         setCartItems([...updatedCart]);
     };
 

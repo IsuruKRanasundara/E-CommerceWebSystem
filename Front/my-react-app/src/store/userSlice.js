@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import AuthService from '../service/authService';
+import AuthService from "@/service/authService.js";
 
-// Async thunks for authentication
+// Create async thunks for all auth operations
 export const registerUser = createAsyncThunk(
     'user/register',
     async (userData, { rejectWithValue }) => {
@@ -9,11 +9,7 @@ export const registerUser = createAsyncThunk(
             const response = await AuthService.register(userData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Registration failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -25,11 +21,7 @@ export const loginUser = createAsyncThunk(
             const response = await AuthService.login(credentials);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Login failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -38,20 +30,12 @@ export const logoutUser = createAsyncThunk(
     'user/logout',
     async (_, { rejectWithValue }) => {
         try {
-            await AuthService.logout();
-            // Clear tokens from storage
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            return {};
+            const response = await AuthService.logout();
+            AuthService.clearAuthData();
+            return response.data;
         } catch (error) {
-            // Even if logout fails on server, clear local data
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Logout failed'
-            );
+            AuthService.clearAuthData(); // Clear data even if API call fails
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -63,14 +47,7 @@ export const verifyToken = createAsyncThunk(
             const response = await AuthService.verifyToken(token);
             return response.data;
         } catch (error) {
-            // Clear invalid token
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Token verification failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -82,11 +59,7 @@ export const updateProfile = createAsyncThunk(
             const response = await AuthService.updateProfile(profileData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Profile update failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -98,11 +71,7 @@ export const changePassword = createAsyncThunk(
             const response = await AuthService.changePassword(passwordData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Password change failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -114,11 +83,7 @@ export const googleAuth = createAsyncThunk(
             const response = await AuthService.googleAuth(googleToken);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Google authentication failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -130,11 +95,7 @@ export const forgotPassword = createAsyncThunk(
             const response = await AuthService.forgotPassword(email);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Password reset request failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -146,11 +107,7 @@ export const resetPassword = createAsyncThunk(
             const response = await AuthService.resetPassword(token, newPassword);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Password reset failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -162,14 +119,7 @@ export const refreshToken = createAsyncThunk(
             const response = await AuthService.refreshToken();
             return response.data;
         } catch (error) {
-            // Clear tokens on refresh failure
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Token refresh failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -181,11 +131,7 @@ export const uploadProfileImage = createAsyncThunk(
             const response = await AuthService.uploadProfileImage(imageData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.error ||
-                error.message ||
-                'Profile image upload failed'
-            );
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -252,7 +198,6 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.success = action.payload.message || 'Registration successful';
                 state.error = null;
-                // Don't set user as authenticated yet - they need to verify email
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -299,7 +244,6 @@ const userSlice = createSlice({
             })
             .addCase(logoutUser.rejected, (state, action) => {
                 state.loading = false;
-                // Still clear user data even if logout request failed
                 state.user = null;
                 state.token = null;
                 state.isAuthenticated = false;
@@ -352,7 +296,6 @@ const userSlice = createSlice({
                 state.passwordChangeLoading = false;
                 state.success = action.payload.message || 'Password changed successfully';
                 state.error = null;
-                // Force logout after password change for security
                 state.user = null;
                 state.token = null;
                 state.isAuthenticated = false;
@@ -372,7 +315,7 @@ const userSlice = createSlice({
                 state.user = action.payload.user;
                 state.token = action.payload.token;
                 state.isAuthenticated = true;
-                state.isEmailVerified = true; // Google accounts are pre-verified
+                state.isEmailVerified = true;
                 state.success = action.payload.message || 'Google authentication successful';
                 state.error = null;
             })
@@ -473,4 +416,4 @@ export const selectPasswordChangeLoading = (state) => state.user.passwordChangeL
 export const selectImageUploadLoading = (state) => state.user.imageUploadLoading;
 
 // Export reducer
-export const authReducer=userSlice.reducer;
+export const authReducer = userSlice.reducer;

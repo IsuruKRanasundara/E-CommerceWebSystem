@@ -1,137 +1,15 @@
-import { useState } from "react";
-import { Star, ShoppingCart, ArrowLeft, Plus, Minus, Heart, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Star, ShoppingCart, ArrowLeft, Plus, Minus } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import Description from "../../component/product/description.jsx";
 import Features from "../../component/product/features.jsx";
 import ReviewSection from "../../component/product/reviewSection.jsx";
-import { AddToCart, ProductCard, ProductDetail } from "../../component/product/productCard.jsx";
+import { AddToCart, ProductCard } from "../../component/product/productCard.jsx";
 import HeroSection from "../../component/common/heroSection.jsx";
 import CarouselDemo from "../../component/common/latest.jsx";
+import ProductService from "@/service/productService.js";
 
-export const existingItem = {items:[]};
-
-const products = [
-    {
-        id: 1,
-        name: "Wireless Headphones",
-        price: 299.99,
-        originalPrice: 399.99,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop",
-        category: "Electronics",
-        rating: 4.5,
-        reviews: 128,
-        description: "Premium wireless headphones with active noise cancellation, 30-hour battery life, and superior sound quality. Perfect for music lovers and professionals.",
-        features: [
-            "Active Noise Cancellation",
-            "30-hour battery life",
-            "Quick charge (5 min = 3 hours)",
-            "Premium leather finish",
-            "Bluetooth 5.0"
-        ],
-        inStock: true,
-        stockCount: 25
-    },
-    {
-        id: 2,
-        name: "Smart Watch",
-        price: 199.99,
-        originalPrice: 249.99,
-        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
-        category: "Wearables",
-        rating: 4.3,
-        reviews: 89,
-        description: "Advanced fitness tracking smartwatch with heart rate monitor, GPS, and 7-day battery life. Track your health and stay connected.",
-        features: [
-            "Heart rate monitoring",
-            "GPS tracking",
-            "7-day battery life",
-            "Waterproof design",
-            "50+ workout modes"
-        ],
-        inStock: true,
-        stockCount: 15
-    },
-    {
-        id: 3,
-        name: "Laptop Stand",
-        price: 79.99,
-        originalPrice: 99.99,
-        image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&h=500&fit=crop",
-        category: "Accessories",
-        rating: 4.7,
-        reviews: 245,
-        description: "Ergonomic aluminum laptop stand with adjustable height and angle. Improve your posture and productivity with this premium stand.",
-        features: [
-            "Adjustable height & angle",
-            "Premium aluminum build",
-            "Heat dissipation design",
-            "Fits 11-17 inch laptops",
-            "Foldable & portable"
-        ],
-        inStock: true,
-        stockCount: 42
-    },
-    {
-        id: 4,
-        name: "Bluetooth Speaker",
-        price: 149.99,
-        originalPrice: 199.99,
-        image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&h=500&fit=crop",
-        category: "Audio",
-        rating: 4.4,
-        reviews: 156,
-        description: "Portable waterproof Bluetooth speaker with 360° sound, 24-hour battery, and rugged design. Perfect for outdoor adventures.",
-        features: [
-            "360° surround sound",
-            "24-hour battery life",
-            "IPX7 waterproof",
-            "Wireless pairing",
-            "Rugged design"
-        ],
-        inStock: false,
-        stockCount: 0
-    },
-    {
-        id: 5,
-        name: "Gaming Mouse",
-        price: 89.99,
-        originalPrice: 119.99,
-        image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500&h=500&fit=crop",
-        category: "Gaming",
-        rating: 4.6,
-        reviews: 312,
-        description: "High-precision gaming mouse with RGB lighting, programmable buttons, and ergonomic design. Dominate your games with precision.",
-        features: [
-            "16000 DPI sensor",
-            "RGB lighting",
-            "8 programmable buttons",
-            "Ergonomic design",
-            "Gaming-grade switches"
-        ],
-        inStock: true,
-        stockCount: 8
-    },
-    {
-        id: 6,
-        name: "Desk Lamp",
-        price: 59.99,
-        originalPrice: 79.99,
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-        category: "Home",
-        rating: 4.2,
-        reviews: 67,
-        description: "LED desk lamp with adjustable brightness, color temperature control, and USB charging port. Perfect for work and study.",
-        features: [
-            "Adjustable brightness",
-            "Color temperature control",
-            "USB charging port",
-            "Touch controls",
-            "Energy efficient LED"
-        ],
-        inStock: true,
-        stockCount: 33
-    }
-];
-
+// Move constants to a separate file or keep them inside the component
 const reviewsData = {
     1: [
         { id: 1, name: "John D.", rating: 5, comment: "Amazing sound quality! The noise cancellation is incredible.", date: "2024-01-15" },
@@ -159,11 +37,17 @@ const reviewsData = {
 };
 
 export default function EcommerceApp() {
+    const dispatch = useDispatch();
+    const products = useSelector(state => state.products?.items || []);
     const [currentPage, setCurrentPage] = useState('products');
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [cart, setCart] = useState([]);
     const [favorites, setFavorites] = useState([]);
+
+    useEffect(() => {
+        dispatch(ProductService.getAll());
+    }, [dispatch]);
 
     const handleProductClick = (product) => {
         setSelectedProduct(product);
@@ -184,11 +68,10 @@ export default function EcommerceApp() {
             updatedCart = [...cart, {
                 ...selectedProduct,
                 quantity,
-                imageUrl: selectedProduct.image // Add imageUrl for navbar compatibility
+                imageUrl: selectedProduct.image
             }];
         }
         setCart(updatedCart);
-        existingItem.items = updatedCart;
     };
 
     const toggleFavorite = (productId) => {
@@ -233,9 +116,9 @@ export default function EcommerceApp() {
                             <div className="flex items-center gap-4">
                                 <div className="relative">
                                     <ShoppingCart className="w-6 h-6 text-gray-700" />
-                                    {existingItem.items && existingItem.items.length > 0 && (
+                                    {cart.length > 0 && (
                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                            {existingItem.items.reduce((sum, item) => sum + item.quantity, 0)}
+                                            {cart.reduce((sum, item) => sum + item.quantity, 0)}
                                         </span>
                                     )}
                                 </div>

@@ -133,15 +133,9 @@ const createProduct = async (req, res) => {
             specifications,
             tags
         } = req.body;
-
+        console.log(name, description, price, discountPrice, brand, category, countInStock);
         // Check if category exists
-        const categoryExists = await Category.findById(category);
-        if (!categoryExists) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid category'
-            });
-        }
+
 
         const product = await Product.create({
             name,
@@ -154,13 +148,13 @@ const createProduct = async (req, res) => {
             images,
             specifications,
             tags,
-            createdBy: req.user._id
-        });
 
+        });
+        console.log(product);
         const populatedProduct = await Product.findById(product._id)
             .populate('category', 'name')
             .populate('createdBy', 'name');
-
+        console.log(populatedProduct)
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
