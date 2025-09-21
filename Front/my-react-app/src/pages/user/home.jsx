@@ -1,7 +1,6 @@
-import { useAuth, useLogout } from "@/hooks/use-auth";
-import { Button } from "@/component/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/component/ui/card";
+
 import { LogOut, User, ShoppingBag, Heart, Package } from "lucide-react";
+import {useAuth, useLogout} from "../../hooks/useAuth.js";
 
 export default function Home() {
     const { user } = useAuth();

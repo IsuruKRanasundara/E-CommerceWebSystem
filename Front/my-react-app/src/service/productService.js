@@ -1,93 +1,83 @@
-import api from "./api";
+
+
+import axios from 'axios';
+
+const API_BASE_URL =  'http://localhost:3001/api';
+
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Add token to requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 const ProductService = {
-    // Get all products
-    getAll: async () => {
+    // Get all products - matches backend getAllProducts
+    getAll: async (params = {}) => {
         try {
-            const response = await api.get("/products/get/");
+            const response = await api.get('/products/get', { params });
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to fetch products" };
+            throw error.response?.data || { message: 'Failed to fetch products' };
         }
     },
 
-    // Get product by ID
+    // Get product by ID - matches backend getProductById
     getById: async (id) => {
         try {
             const response = await api.get(`/products/get/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to fetch product" };
+            throw error.response?.data || { message: 'Failed to fetch product' };
         }
     },
 
-    // Create new product (Admin only)
+    // Create product - matches backend createProduct
     create: async (productData) => {
         try {
-            const response = await api.post("/products/create/", productData);
+            const response = await api.post('/products/create', productData);
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to create product" };
+            throw error.response?.data || { message: 'Failed to create product' };
         }
     },
 
-    // Update product (Admin only)
+    // Update product - matches backend updateProduct
     update: async (id, productData) => {
         try {
             const response = await api.put(`/products/get/${id}`, productData);
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to update product" };
+            throw error.response?.data || { message: 'Failed to update product' };
         }
     },
 
-    // Delete product (Admin only)
+    // Delete product - matches backend deleteProduct
     delete: async (id) => {
         try {
             const response = await api.delete(`/products/get/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to delete product" };
+            throw error.response?.data || { message: 'Failed to delete product' };
         }
     },
 
-    // Get products by category
-    getByCategory: async (category) => {
+    // Get featured products - matches backend getFeaturedProducts
+    getFeatured: async () => {
         try {
-            const response = await api.get(`/products/get/${category}`);
+            const response = await api.get('/products/featured');
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: "Failed to fetch products by category" };
-        }
-    },
-
-    // Search products
-    search: async (query) => {
-        try {
-            const response = await api.get(`/products/get/${query}?query=${query}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: "Failed to search products" };
-        }
-    },
-
-    // Get products by price range
-    getByPriceRange: async (minPrice, maxPrice) => {
-        try {
-            const response = await api.get(`/products/get/priceRange?minPrice=${minPrice}&maxPrice=${maxPrice}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: "Failed to fetch products by price range" };
-        }
-    },
-
-    // Update product quantity (after purchase)
-    updateQuantity: async (id, productData) => {
-        try {
-            const response = await api.put(`/products/get/${id}`, productData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: "Failed to update product quantity" };
+            throw error.response?.data || { message: 'Failed to fetch featured products' };
         }
     }
 };

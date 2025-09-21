@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ShoppingBag, AlertCircle, CheckCircle, Chrome, Phone, MapPin } from 'lucide-react';
-import { clearError, clearSuccess } from '@/store/userSlice.js';
-import AuthService from "@/service/authService.js";
+import { clearError, clearSuccess, registerUser, verifyToken } from '../../store/userSlice.js';
+import AuthService from "../../service/authService.js";
 
 const SignUp = () => {
     const dispatch = useDispatch();
@@ -193,7 +193,7 @@ const SignUp = () => {
 
         // Dispatch the register action
         try {
-            await dispatch(AuthService.register(userData)).unwrap();
+            await dispatch(registerUser(userData)).unwrap();
         } catch (error) {
             // Error is handled by Redux store
             console.error('Registration failed:', error);
@@ -204,17 +204,7 @@ const SignUp = () => {
         dispatch(clearError());
         if (provider === 'google') {
             try {
-                // Replace this with real Google OAuth logic
-                const googleToken = await AuthService.getGoogleToken();
-                if (googleToken) {
-                    const result = await dispatch(AuthService.googleAuth(googleToken)).unwrap();
-
-                    // Store token
-                    if (result.token) {
-                        localStorage.setItem('token', result.token);
-                        sessionStorage.removeItem('token');
-                    }
-                }
+                console.log('Google registration not implemented yet');
             } catch (err) {
                 console.error('Social registration failed:', err);
             }
@@ -266,7 +256,7 @@ const SignUp = () => {
                                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
                             )}
                             <span className="text-sm">
-                                {success ? 'Account created successfully! Please check your email to verify your account. Redirecting to sign in...' : error}
+                                {success ? 'Account created successfully! Redirecting to sign in...' : error}
                             </span>
                         </div>
                     )}
@@ -628,4 +618,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

@@ -1,17 +1,18 @@
 import axios from 'axios';
-import { SSO_LOGIN_URL, GOOGLE_CLIENT_ID } from '@/utils/constants';
 
-// Create axios instance with base configuration
-const API = axios.create({
-    baseURL:  'http://localhost:3001/api',
-    timeout: 10000,
+const API_BASE_URL =   'http://localhost:3001/api';
+
+// Create axios instance
+const api = axios.create({
+    baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // For cookies
 });
 
-// Request interceptor to add auth token
-API.interceptors.request.use(
+// Request interceptor to add token
+api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
@@ -24,374 +25,141 @@ API.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle token refresh and errors
-API.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+// Response interceptor for error handling
+api.interceptors.response.use(
+    (response) => response,
     async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
+        if (error.response?.status === 401) {
+            // Token expired, try to refresh
             try {
-                // Try to refresh token
-                const refreshResponse = await API.post('/auth/refresh-token');
-                const { token } = refreshResponse.data;
+                const refreshResponse = await api.post('/auth/refresh-token');
+                const newToken = refreshResponse.data.token;
 
                 // Update token in storage
-                const isRemembered = localStorage.getItem('token');
-                if (isRemembered) {
-                    localStorage.setItem('token', token);
+                if (localStorage.getItem('token')) {
+                    localStorage.setItem('token', newToken);
                 } else {
-                    sessionStorage.setItem('token', token);
+                    sessionStorage.setItem('token', newToken);
                 }
 
-                // Retry original request with new token
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-                return API(originalRequest);
+                // Retry original request
+                error.config.headers.Authorization = `Bearer ${newToken}`;
+                return api.request(error.config);
             } catch (refreshError) {
-                // Refresh failed, clear tokens and redirect to login
+                // Refresh failed, redirect to login
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('token');
-
-                // Redirect to login page
-                if (window.location.pathname !== '/signIn') {
-                    window.location.href = '/signIn';
-                }
-
-                return Promise.reject(refreshError);
+                window.location.href = '/signIn';
             }
         }
-
         return Promise.reject(error);
     }
 );
 
-class AuthService {
-    // User Registration
-    async register(userData) {
-        // eslint-disable-next-line no-useless-catch
+const AuthService = {
+    // Register user
+    register: async (userData) => {
         try {
-            const response = await API.post('/auth/register', userData);
-            return response;
+            const response = await api.post('/auth/register', userData);
+            return response.data;
         } catch (error) {
-            throw error;
+            throw error.response?.data || { message: 'Registration failed' };
         }
-    }
+    },
 
-    // User Login
-    async login(credentials) {
-        // eslint-disable-next-line no-useless-catch
+    // Login user
+    login: async (credentials) => {
         try {
-            const response = await API.post('/auth/login', credentials);
-            return response;
+            const response = await api.post('/auth/login', credentials);
+            return response.data;
         } catch (error) {
-            throw error;
+            throw error.response?.data || { message: 'Login failed' };
         }
-    }
+    },
 
-    // User Logout
-    async logout() {
-        // eslint-disable-next-line no-useless-catch
+    // Logout user
+    logout: async () => {
         try {
-            const response = await API.post('/auth/logout');
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Verify Token
-    async verifyToken(token) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.get('/auth/verify', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Get Current User Profile
-    async getProfile() {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.get('/auth/profile');
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Update User Profile
-    async updateProfile(profileData) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.put('/auth/profile', profileData);
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Change Password
-    async changePassword(passwordData) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.put('/auth/change-password', passwordData);
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Google OAuth Authentication
-    async googleAuth(googleToken) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.post('/auth/google', { token: googleToken });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Get Google OAuth Token (mock implementation)
-    async getGoogleToken() {
-        return new Promise((resolve, reject) => {
-            // This is where you would implement actual Google OAuth
-            // For now, this is a mock implementation
-
-            // Example using Google Identity Services
-            if (window.google && window.google.accounts) {
-                window.google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: (response) => {
-                        resolve(response.credential);
-                    },
-                    error_callback: (error) => {
-                        reject(new Error('Google authentication failed', error));
-                    }
-                });
-                window.google.accounts.id.prompt();
-            } else {
-                // Fallback: open Google OAuth popup
-                const popup = window.open(
-                    `http://localhost:3001/api/auth/google`,
-                    'google-oauth',
-                    'width=500,height=600,scrollbars=yes,resizable=yes'
-                );
-
-                const checkClosed = setInterval(() => {
-                    if (popup.closed) {
-                        clearInterval(checkClosed);
-                        reject(new Error('Google authentication was cancelled'));
-                    }
-                }, 1000);
-
-                // Listen for message from popup
-                const messageListener = (event) => {
-                    if (event.origin !== window.location.origin) return;
-
-                    if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-                        clearInterval(checkClosed);
-                        window.removeEventListener('message', messageListener);
-                        popup.close();
-                        resolve(event.data.token);
-                    } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
-                        clearInterval(checkClosed);
-                        window.removeEventListener('message', messageListener);
-                        popup.close();
-                        reject(new Error(event.data.error));
-                    }
-                };
-
-                window.addEventListener('message', messageListener);
-            }
-        });
-    }
-
-    // Forgot Password
-    async forgotPassword(email) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.post('/auth/forgot-password', { email });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Reset Password
-    async resetPassword(token, newPassword) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.post(`/auth/reset-password/${token}`, {
-                password: newPassword
-            });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Refresh Token
-    async refreshToken() {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.post('/auth/refresh-token');
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Upload Profile Image
-    async uploadProfileImage(imageData) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const formData = new FormData();
-
-            if (imageData instanceof File) {
-                formData.append('image', imageData);
-            } else if (typeof imageData === 'string') {
-                // Handle base64 or URL
-                const response = await API.post('/auth/upload-profile-image', {
-                    imageUrl: imageData
-                });
-                return response;
-            }
-
-            const response = await API.post('/auth/upload-profile-image', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Verify Email
-    async verifyEmail(token) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.get(`/auth/verify-email/${token}`);
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Resend Verification Email
-    async resendVerificationEmail() {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await API.post('/auth/resend-verification');
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Get SAML Login URL
-    async getSAMLLoginUrl() {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const response = await axios.get(SSO_LOGIN_URL);
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Check if user is authenticated
-    isAuthenticated() {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        return !!token;
-    }
-
-    // Get stored token
-    getToken() {
-        return localStorage.getItem('token') || sessionStorage.getItem('token');
-    }
-
-    // Clear all auth data
-    clearAuthData() {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-    }
-
-    // Set token in storage
-    setToken(token, remember = false) {
-        if (remember) {
-            localStorage.setItem('token', token);
-            sessionStorage.removeItem('token');
-        } else {
-            sessionStorage.setItem('token', token);
+            await api.post('/auth/logout');
             localStorage.removeItem('token');
-        }
-    }
-
-    // Get user from token (decode JWT)
-    getUserFromToken(token = null) {
-        const authToken = token || this.getToken();
-        if (!authToken) return null;
-
-        try {
-            const payload = JSON.parse(atob(authToken.split('.')[1]));
-            return payload;
+            sessionStorage.removeItem('token');
         } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
+            console.error('Logout error:', error);
         }
-    }
+    },
 
-    // Check if token is expired
-    isTokenExpired(token = null) {
-        const authToken = token || this.getToken();
-        if (!authToken) return true;
-
+    // Verify token
+    verifyToken: async (token) => {
         try {
-            const payload = JSON.parse(atob(authToken.split('.')[1]));
-            const currentTime = Date.now() / 1000;
-            return payload.exp < currentTime;
+            const response = await api.get('/auth/verify', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
         } catch (error) {
-            console.error('Error checking token expiration:', error);
-            return true;
+            throw error.response?.data || { message: 'Token verification failed' };
+        }
+    },
+
+    // Get SAML login URL
+    getSAMLLoginUrl: async () => {
+        try {
+            const response = await api.get('/auth/login-url');
+            return response;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to get SAML login URL' };
+        }
+    },
+
+    // Handle SAML callback
+    handleSamlCallback: async (token) => {
+        try {
+            // Store token
+            localStorage.setItem('token', token);
+            return { success: true };
+        } catch (error) {
+            throw error.response?.data || { message: 'SAML callback failed' };
+        }
+    },
+
+    // Get user profile
+    getProfile: async () => {
+        try {
+            const response = await api.get('/auth/profile');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to get profile' };
+        }
+    },
+
+    // Update profile
+    updateProfile: async (profileData) => {
+        try {
+            const response = await api.put('/auth/profile', profileData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to update profile' };
+        }
+    },
+
+    // Forgot password
+    forgotPassword: async (email) => {
+        try {
+            const response = await api.post('/auth/forgot-password', { email });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to send reset email' };
+        }
+    },
+
+    // Reset password
+    resetPassword: async (token, password) => {
+        try {
+            const response = await api.post(`/auth/reset-password/${token}`, { password });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to reset password' };
         }
     }
+};
 
-    // Initialize auth state
-    async initializeAuth() {
-        const token = this.getToken();
-        if (token && !this.isTokenExpired(token)) {
-            try {
-                const response = await this.verifyToken(token);
-                return response.data;
-            } catch (error) {
-                this.clearAuthData();
-                throw error;
-            }
-        } else if (token) {
-            // Token expired, try to refresh
-            try {
-                const response = await this.refreshToken();
-                return response.data;
-            } catch (error) {
-                this.clearAuthData();
-                throw error;
-            }
-        }
-        return null;
-    }
-}
-
-export default new AuthService();
+export default AuthService;

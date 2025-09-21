@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
-import { clearError, clearSuccess } from '@/store/userSlice.js';
-import AuthService from "@/service/authService.js";
+import { clearError, clearSuccess, loginUser, verifyToken } from '../../store/userSlice.js';
+import AuthService from "../../service/authService.js";
 
 // Mock AuthLayout component
 const AuthLayout = ({ children }) => (
@@ -32,7 +32,7 @@ export default function SignIn() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token && !isAuthenticated) {
             // Verify existing token
-            dispatch(AuthService.verifyToken(token));
+            dispatch(verifyToken(token));
         }
     }, [dispatch, isAuthenticated]);
 
@@ -114,10 +114,10 @@ export default function SignIn() {
 
         // Dispatch login action
         try {
-            const result = await dispatch(AuthService.login({
+            const result = await dispatch(loginUser({
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password
-            }));
+            })).unwrap();
 
             // Store token based on remember me preference
             if (result.token) {
@@ -140,21 +140,7 @@ export default function SignIn() {
         if (provider === 'google') {
             try {
                 // Replace this with real Google OAuth logic
-                const googleToken = await AuthService.getGoogleToken();
-                if (googleToken) {
-                    const result = await dispatch(AuthService.googleAuth(googleToken)).unwrap();
-
-                    // Store token based on remember me preference
-                    if (result.token) {
-                        if (formData.rememberMe) {
-                            localStorage.setItem('token', result.token);
-                            sessionStorage.removeItem('token');
-                        } else {
-                            sessionStorage.setItem('token', result.token);
-                            localStorage.removeItem('token');
-                        }
-                    }
-                }
+                console.log('Google login not implemented yet');
             } catch (err) {
                 console.error('Social login failed:', err);
             }

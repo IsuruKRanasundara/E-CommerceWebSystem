@@ -1,32 +1,34 @@
 import React from "react";
-
-import About from "../pages/user/about.jsx";
-import {  Routes, Route } from "react-router-dom";
-import SignIn from "../pages/user/signIn.jsx";
-import Ecommerce from "../pages/user/products.jsx";
-import ContactUs from "../pages/user/contactUs.jsx";
-import SignUp from "../pages/user/signup.jsx";
+import { Routes, Route } from "react-router-dom";
 import NotFound from "../pages/user/not-found.jsx";
-import CartList from "../pages/user/cartList.jsx";
-import AdminDashboard from "@/pages/admin/dashboard.jsx";
+import AdminDashboard from "../pages/admin/dashboard.jsx";
+import AdminHeader from "../component/admin/AdminHeader.jsx";
+import AdminSidebar from "../component/admin/AdminSideBar.jsx";
+import ProductManagement from "../pages/admin/ProductManagement.jsx";
+import UserManagement from "../pages/admin/UserManagement.jsx";
+import OrderManagement from "../pages/admin/OrderManagement.jsx";
+import CategoryManagement from "../pages/admin/CategoryManagement.jsx";
 
-function AdminNavRoute() {
-
+function AdminRoutes() {
     return (
-        <>
-
-
-
-            <Routes>
-                <Route path={"*"} element={<NotFound />} />
-                <Route path={"/"} element={<Ecommerce/> } />
-                <Route path={"/admin/dashboard"} element={<AdminDashboard />}/>
-
-            </Routes>
-
-        </>
-    )
+        <div className="min-h-screen bg-gray-100">
+            <AdminHeader />
+            <div className="flex">
+                <AdminSidebar />
+                <main className="flex-1 p-6">
+                    <Routes>
+                        <Route path="/" element={<AdminDashboard />} />
+                        <Route path="/dashboard" element={<AdminDashboard />} />
+                        <Route path="/products" element={<ProductManagement />} />
+                        <Route path="/users" element={<UserManagement />} />
+                        <Route path="/orders" element={<OrderManagement />} />
+                        <Route path="/categories" element={<CategoryManagement />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </main>
+            </div>
+        </div>
+    );
 }
 
-export default AdminNavRoute;
-// To handle the admin routes
+export default AdminRoutes;

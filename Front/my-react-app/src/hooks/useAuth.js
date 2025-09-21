@@ -1,13 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import {
     setUser,
-    clearUser,
     setLoading,
     setError,
     selectCurrentUser,
     selectIsAuthenticated,
     selectAuthLoading,
-    selectAuthError,
+
     logoutUser as logoutAction
 } from '../store/userSlice.js';
 
@@ -16,7 +15,7 @@ export function useAuth() {
     const user = useSelector(selectCurrentUser);
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const isLoading = useSelector(selectAuthLoading);
-    const error = useSelector(selectAuthError);
+
 
     const login = async (userData) => {
         try {
@@ -38,7 +37,7 @@ export function useAuth() {
         user,
         isAuthenticated,
         isLoading,
-        error,
+
         login,
         logout
     };

@@ -1,66 +1,126 @@
-// src/store/cartSlice.js
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import CartService from '../service/cartService';
 
-const CART_KEY = 'cart_v1';
-
-function loadCart() {
-    try {
-        const stored = localStorage.getItem(CART_KEY);
-        if (!stored) return { items: [] };
-        const parsed = JSON.parse(stored);
-        return { items: Array.isArray(parsed.items) ? parsed.items : [] };
-    } catch {
-        return { items: [] };
+// Async thunks for cart operations
+export const addToCart = createAsyncThunk(
+    'cart/addToCart',
+    async ({ productId, quantity }, { rejectWithValue }) => {
+        try {
+            const response = await CartService.addItem(productId, quantity);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to add to cart');
+        }
     }
-}
+);
+
+export const fetchCart = createAsyncThunk(
+    'cart/fetchCart',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await CartService.getCart();
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch cart');
+        }
+    }
+);
+
+export const updateCartItem = createAsyncThunk(
+    'cart/updateCartItem',
+    async ({ productId, quantity }, { rejectWithValue }) => {
+        try {
+            const response = await CartService.updateItem(productId, quantity);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to update cart item');
+        }
+    }
+);
+
+export const removeFromCart = createAsyncThunk(
+    'cart/removeFromCart',
+    async (productId, { rejectWithValue }) => {
+        try {
+            const response = await CartService.removeItem(productId);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to remove from cart');
+        }
+    }
+);
+
+export const clearCart = createAsyncThunk(
+    'cart/clearCart',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await CartService.clearCart();
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to clear cart');
+        }
+    }
+);
+
+const initialState = {
+    items: [],
+    totalAmount: 0,
+    totalItems: 0,
+    loading: false,
+    error: null
+};
 
 const cartSlice = createSlice({
     name: 'cart',
-    initialState: loadCart(),
+    initialState,
     reducers: {
-        addItem: {
-            prepare(product) {
-                return {
-                    payload: {
-                        lineId: nanoid(),
-                        quantity: product.quantity || 1,
-                        ...product
-                    }
-                };
-            },
-            reducer(state, action) {
-                const { productId, quantity } = action.payload;
-                const existing = state.items.find(item => item.productId === productId);
-
-                if (existing) {
-                    existing.quantity += quantity;
-                } else {
-                    state.items.push(action.payload);
-                }
-            }
-        },
-        updateQuantity(state, action) {
-            const { lineId, quantity } = action.payload;
-            const item = state.items.find(item => item.lineId === lineId);
-            if (item) {
-                item.quantity = Math.max(1, quantity);
-            }
-        },
-        removeItem(state, action) {
-            state.items = state.items.filter(item => item.lineId !== action.payload);
-        },
-        clearCart(state) {
-            state.items = [];
+        clearError: (state) => {
+            state.error = null;
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            // Add to cart
+            .addCase(addToCart.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addToCart.fulfilled, (state, action) => {
+                state.loading = false;
+                state.items = action.payload.products || [];
+                state.totalAmount = action.payload.totalAmount || 0;
+                state.totalItems = action.payload.totalItems || 0;
+            })
+            .addCase(addToCart.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Fetch cart
+            .addCase(fetchCart.fulfilled, (state, action) => {
+                state.items = action.payload.products || [];
+                state.totalAmount = action.payload.totalAmount || 0;
+                state.totalItems = action.payload.totalItems || 0;
+            })
+            // Update cart item
+            .addCase(updateCartItem.fulfilled, (state, action) => {
+                state.items = action.payload.products || [];
+                state.totalAmount = action.payload.totalAmount || 0;
+                state.totalItems = action.payload.totalItems || 0;
+            })
+            // Remove from cart
+            .addCase(removeFromCart.fulfilled, (state, action) => {
+                state.items = action.payload.products || [];
+                state.totalAmount = action.payload.totalAmount || 0;
+                state.totalItems = action.payload.totalItems || 0;
+            })
+            // Clear cart
+            .addCase(clearCart.fulfilled, (state) => {
+                state.items = [];
+                state.totalAmount = 0;
+                state.totalItems = 0;
+            });
     }
 });
 
-export const { addItem, updateQuantity, removeItem, clearCart } = cartSlice.actions;
-export const cartReducer = cartSlice.reducer;
-
-// Selectors
-export const selectCartItems = state => state.cart?.items || [];
-export const selectCartCount = state =>
-    state.cart?.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
-export const selectCartTotal = state =>
-    state.cart?.items?.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0) || 0;
+export const { clearError } = cartSlice.actions;
+export default cartSlice.reducer;
